@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<script src="tlds.js" defer></script>
+<script src="popup.js" defer></script>
+<title>MorePass</title>
+<style>
+body { font-size: 100%; font-family: Verdana, Helvetica; background: radial-gradient(ellipse at center center, #34749c 0%, #2a6085 41%, #1d3f59 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 300px; width: 30em; }
+label,div { display: inline-block; width: 27.2em; }
+label,div.url { padding: 2px 0; }
+div.url { display: none; }
+div.url.on { display: inline-block; }
+span { display: inline-block; width: 8em; }
+div.url>span { width: 4.1em; }
+s { text-decoration: none; color: #AAA; }
+select { width: calc(20em + 6px); font-size: 15px; }
+input[type=text],input[type=password],button { font-size: 15px; width: 20em; padding-left: 4px; border-radius: 4px; border: 1px solid #CCC; }
+button { width: auto; color: #FFF; background-image: linear-gradient(to bottom, #86c8f1, #2c7db1); text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25) rgba(0, 0, 0, 0.5) rgba(0, 0, 0, 0.1); }
+button:active:hover { background-image: linear-gradient(to top, #86c8f1, #2c7db1); }
+input:focus { box-shadow: 0 0 8px 2px white; outline: 0 none; }
+input[name="host"] { width: 12em; }
+input[name="path"] { width: 7em; }
+b { display:inline-block; width: 15px; padding-left: 3px; height: 18px; vertical-align: text-bottom; margin: 5px 0 0 4px; border-radius: 9px; cursor: pointer; background-color: #4BBC33; line-height: 17px; font-size: 13px; }
+b:active:hover { box-shadow: 0 0 4px 2px white; }
+</style>
+</head>
+<body>
+	<form id="decrypt">
+		<label><span>E-mail address</span><input type="text" id="email"/></label>
+		<label><span>Passphrase</span><input type="password" id="passphrase"/></label>
+		<label><span></span><button type="button">Decrypt the password vault</button></label>
+	</form>
+	<form id="site">
+		<h2>Website</h2>
+		<label><span></span><select name="siteset"></select></label>
+		<div>
+			<div class="url on"><span>Url</span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+		</div><b title="Add another site with the same credentials (like ebay.com, ebay.ca, ebay.de)">+</b>
+		<label><span>Username</span><input type="text" name="username"/></label>
+		<label><span>Password</span><input type="password" name="password"/></label>
+		<label><span></span><button type="button">Save site</button></label>
+	</form>
+</body>
+</html>
