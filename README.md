@@ -11,5 +11,8 @@ See for yourself. Read the sourcecode (it's just javascript) and report any bugs
 Because LastPass is starting to fustrate me. Do you know they can now recover your stuff when you lost your master passphrase? Also the interface just bugs me.
 
 ## How to use?
-While in development, you can clone or download this WebExtension, then for Chrome go to chrome://extensions/ , enable "Developer mode" and then "Load unpacked extension...". Point it to the root of the MorePass folder/dir you just created.
-For Firefox, go to about:debugging , check the "Enable add-on debugging" box and click "Load Temporary Addon". Select the manifest.json file and open it.
+While in development, you can clone or download this WebExtension, then ...
+
+For Chrome go to chrome://extensions/, enable "Developer mode" and then "Load unpacked extension...". Point it to the root of the MorePass folder/dir you just created.
+
+For Firefox, go to about:debugging, check the "Enable add-on debugging" box and click "Load Temporary Addon". Select the manifest.json file and open it.
