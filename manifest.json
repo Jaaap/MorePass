@@ -1,0 +1,29 @@
+{
+	"description": "MorePass password manager",
+	"manifest_version": 2,
+	"name": "MorePass",
+	"version": "0.0.1",
+	"homepage_url": "https://jaaap.github.io/MorePass/",
+	"icons": {
+		"64": "icons/logo-64.png"
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["content.js"],
+			"run_at": "document_end"
+		}
+	],
+	"permissions": [
+		"*://am6.nl/morepass/*",
+		"activeTab",
+		"storage",
+		"webRequest",
+		"webRequestBlocking"
+	],
+	"browser_action": {
+		"default_icon": "icons/logo-32.png",
+		"default_title": "MorePass",
+		"default_popup": "popup.html"
+	}
+}
