@@ -1,13 +1,13 @@
 (function(){
 
-let data = [];
+let vault = [];
 
 function init()
 {
 	chrome.storage.local.get("vault", function(result){
 		console.log(JSON.stringify(result.valut));
-		data = result.vault||[];
-		fillSitesetSelect(data);
+		vault = result.vault||[];
+		fillSitesetSelect(vault);
 	});
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
@@ -27,7 +27,7 @@ function init()
 						console.log("hasLoginForm", hasLoginForm);
 						if (hasLoginForm)
 						{
-							let row = data[topScoreIdx];
+							let row = vault[topScoreIdx];
 							chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2] }, function (response) {});
 						}
 					}
@@ -49,10 +49,9 @@ function onSitesetSelectChange(evt)
 
 	let nrOfSites = 0;
 	let urlDivs = document.querySelectorAll('div>div.url');
-console.log(select.value, data[select.value], data.length);
 	if (select.value >= 0)
 	{
-		let siteset = data[select.value];
+		let siteset = vault[select.value];
 		nrOfSites = siteset[0].length;
 		document.querySelector('input[name="username"]').value = siteset[1];
 		document.querySelector('input[name="password"]').value = siteset[2];
@@ -87,7 +86,7 @@ function onPlusIconClick(evt)
 function onSitesetSaveClick(evt)
 {
 	//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
-	var entry = [[]];
+	let entry = [[]];
 	entry[1] = document.querySelector('input[name="username"]').value;
 	entry[2] = document.querySelector('input[name="password"]').value;
 	let urlDivs = document.querySelectorAll('div>div.url');
@@ -97,22 +96,34 @@ function onSitesetSaveClick(evt)
 		if (urlDivs[i].classList.contains("on") && host != "")
 		{
 			let url = new URL('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value);
-			entry[0].push({hostname: url.hostname, pathname: url.pathname});//FIXME: remove first slash from pathname, add port, query and hash stuff
+			let site = {hostname: url.hostname};
+			if (url.pathname.length > 1)
+				site.pathname = url.pathname.substring(1);
+			if (url.port.length > 0)
+				site.port = url.port.substring(1);
+			if (url.search.length > 0)
+				site.search = url.search.substring(1);
+			entry[0].push(site);
 		}
 	}
-	data.push(entry);//FIXME: overwrite if existing site
-	chrome.storage.local.set({"vault": data});
-	fillSitesetSelect(data);
+	var selectValue = document.querySelector('form#site>label>select').value;
+	if (selectValue >= 0 && selectValue < vault.length)
+		vault[selectValue] = entry;
+	else
+		vault.push(entry);
+	vault = vault.sort(function(aa,bb){
+		let a = aa[0][0].hostname;
+		let b = bb[0][0].hostname;
+		return (a < b ? -1 : +(a > b));
+	});
+	chrome.storage.local.set({"vault": vault});
+	fillSitesetSelect(vault);
+	onSitesetSelectChange({target: document.querySelector('form#site>label>select')});
 }
 
 function fillSitesetSelect(dta)
 {
 	let frag = document.createDocumentFragment();
-	dta = dta.sort(function(aa,bb){
-		let a = aa[0][0].hostname;
-		let b = bb[0][0].hostname;
-		return (a < b ? -1 : +(a > b));
-	});
 //console.log(dta);
 	for (let i = -1; i < dta.length; i++)
 	{
@@ -121,7 +132,10 @@ function fillSitesetSelect(dta)
 		opt.appendChild(document.createTextNode(i == -1 ? "* Add new site *" : dta[i][0].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
 		frag.appendChild(opt);
 	}
-	document.querySelector('form#site>label>select').appendChild(frag);
+	let select = document.querySelector('form#site>label>select');
+	while (select.hasChildNodes())
+		select.removeChild(select.lastChild);
+	select.appendChild(frag);
 }
 
 function getCurrentTab() {
@@ -135,24 +149,24 @@ function getCurrentTab() {
 function getTopScoreIdx(tabLocation)
 {
 	var topScore = 0;
-	var dataIdx = -1;
-	for (var i = 0; i < data.length; i++)
+	var vaultIdx = -1;
+	for (var i = 0; i < vault.length; i++)
 	{
-		var bookmarks = data[i][0];
+		var bookmarks = vault[i][0];
 		for (var j = 0; j < bookmarks.length; j++)
 		{
 			var score = getLocationMatchScore(tabLocation, bookmarks[j]);
 			if (score > topScore)
 			{
 				topScore = score;
-				dataIdx = i;
+				vaultIdx = i;
 			}
 		}
 	}
 	if (topScore > 0)
 	{
-		console.log("getTopScoreIdx", topScore, data[dataIdx][0]);
-		return dataIdx;
+		console.log("getTopScoreIdx", topScore, vault[vaultIdx][0]);
+		return vaultIdx;
 	}
 }
 
@@ -171,20 +185,10 @@ function getLocationMatchScore(tabLoc, bmLoc)
 			score += 5 + Math.log(bmLoc.pathname.length);
 		if (bmLoc.search && tabLoc.search === bmLoc.search)
 			score += 2;
-		if (bmLoc.hash && tabLoc.hash === bmLoc.hash)
-			score += 1;
 	}
 //console.log(bmLoc.hostname, score);
 	return score;
 }
-
-
-
-/*
-let data = [
-];
-*/
-
 
 document.addEventListener("DOMContentLoaded", init);
 
