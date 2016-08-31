@@ -25,5 +25,8 @@
 		"default_icon": "icons/logo-32.png",
 		"default_title": "MorePass",
 		"default_popup": "popup.html"
+	},
+	"background": {
+		"scripts": ["background.js"]
 	}
 }

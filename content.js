@@ -19,6 +19,16 @@ function getUsernameInput(passwordInput)
 	}
 }
 
+function onLoginformSubmit(evt)
+{
+	//FIXME: don't do this when the popup is submiting this form
+	let passwordInput = getPasswordInput();
+	let usernameInput = getUsernameInput(passwordInput) || {value:null};
+	chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value}, function(response) {
+		console.log(response);
+	});
+}
+
 /* messaging */
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 {
@@ -45,6 +55,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 });
 
 
+/* init */
+let passwordInput = getPasswordInput();
+if (passwordInput)
+{
+	passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
+}
 
 
 })();
