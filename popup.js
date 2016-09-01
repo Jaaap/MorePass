@@ -28,7 +28,7 @@ function init()
 						if (hasLoginForm)
 						{
 							let row = vault[topScoreIdx];
-							chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2] }, function (response) { setTimeout(function(){window.close();}, 1000); });
+							chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2] }, function (response) { window.close(); });
 						}
 					}
 				});
