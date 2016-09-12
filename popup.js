@@ -1,38 +1,35 @@
 (function(){
 
-let vault = [];
 
 function init()
 {
-	chrome.storage.local.get("vault", function(result){
-		console.log(JSON.stringify(result.valut));
-		vault = result.vault||[];
-		fillSitesetSelect(vault);
-	});
-	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
-	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
-	document.querySelector('form#site>label>button').addEventListener("click", onSitesetSaveClick, false);
-
 	if ("chrome" in window)
 	{
-		getCurrentTab().then(function (currentTab) {
-			let tabLocation = new URL(currentTab.url);
-			document.querySelector('form#site>div>div>input').value = getBaseDomain(tabLocation.hostname);
-			let topScoreIdx = getTopScoreIdx(tabLocation);
+		chrome.runtime.sendMessage({action: "vault.get"}, function(vault) {
+			console.log(1, vault);
+			fillSitesetSelect(vault);
 
-			if (topScoreIdx > -1)
-			{
-				chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (hasLoginForm) {
-					if (typeof hasLoginForm !== 'undefined') {
-						console.log("hasLoginForm", hasLoginForm);
-						if (hasLoginForm)
-						{
-							let row = vault[topScoreIdx];
-							chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2] }, function (response) { window.close(); });
+			chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+				let currentTab = tabs[0];
+
+				let tabLocation = new URL(currentTab.url);
+				document.querySelector('form#site>div>div>input').value = getBaseDomain(tabLocation.hostname);
+				let topScoreIdx = getTopScoreIdx(vault, tabLocation);
+
+				if (topScoreIdx > -1)
+				{
+					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (hasLoginForm) {
+						if (typeof hasLoginForm !== 'undefined') {
+							console.log("hasLoginForm", hasLoginForm);
+							if (hasLoginForm)
+							{
+								let row = vault[topScoreIdx];
+								chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2] }, function (response) { window.close(); });
+							}
 						}
-					}
-				});
-			}
+					});
+				}
+			});
 		});
 	}
 	else
@@ -40,6 +37,9 @@ function init()
 		console.error("window.chrome not found");
 	}
 
+	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
+	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
+	document.querySelector('form#site>label>button').addEventListener("click", onSitesetSaveClick, false);
 }
 
 
@@ -51,17 +51,19 @@ function onSitesetSelectChange(evt)
 	let urlDivs = document.querySelectorAll('div>div.url');
 	if (select.value >= 0)
 	{
-		let siteset = vault[select.value];
-		nrOfSites = siteset[0].length;
-		document.querySelector('input[name="username"]').value = siteset[1];
-		document.querySelector('input[name="password"]').value = siteset[2];
-		for (let j = 0; j < nrOfSites; j++)
-		{
-			urlDivs[j].classList.add("on");
-			let inputs = urlDivs[j].querySelectorAll('input');
-			inputs[0].value = siteset[0][j].hostname;
-			inputs[1].value = siteset[0][j].pathname || "";
-		}
+		chrome.runtime.sendMessage({action: "vault.get"}, function(vault) {
+			let siteset = vault[select.value];
+			nrOfSites = siteset[0].length;
+			document.querySelector('input[name="username"]').value = siteset[1];
+			document.querySelector('input[name="password"]').value = siteset[2];
+			for (let j = 0; j < nrOfSites; j++)
+			{
+				urlDivs[j].classList.add("on");
+				let inputs = urlDivs[j].querySelectorAll('input');
+				inputs[0].value = siteset[0][j].hostname;
+				inputs[1].value = siteset[0][j].pathname || "";
+			}
+		});
 	}
 	else
 	{
@@ -107,18 +109,10 @@ function onSitesetSaveClick(evt)
 		}
 	}
 	var selectValue = document.querySelector('form#site>label>select').value;
-	if (selectValue >= 0 && selectValue < vault.length)
-		vault[selectValue] = entry;
+	if (selectValue >= 0)
+		chrome.runtime.sendMessage({action: "vault.edit", siteset: entry, idx: selectValue}, function(vault) { fillSitesetSelect(vault); });
 	else
-		vault.push(entry);
-	vault = vault.sort(function(aa,bb){
-		let a = aa[0][0].hostname;
-		let b = bb[0][0].hostname;
-		return (a < b ? -1 : +(a > b));
-	});
-	chrome.storage.local.set({"vault": vault});
-	fillSitesetSelect(vault);
-	onSitesetSelectChange({target: document.querySelector('form#site>label>select')});
+		chrome.runtime.sendMessage({action: "vault.add", siteset: entry}, function(vault) { fillSitesetSelect(vault); });
 }
 
 function fillSitesetSelect(dta)
@@ -136,17 +130,11 @@ function fillSitesetSelect(dta)
 	while (select.hasChildNodes())
 		select.removeChild(select.lastChild);
 	select.appendChild(frag);
+	onSitesetSelectChange({target: select});
 }
 
-function getCurrentTab() {
-	return new Promise(function (resolve) {
-		chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-			resolve(tabs[0]);
-		});
-	});
-}
 
-function getTopScoreIdx(tabLocation)
+function getTopScoreIdx(vault, tabLocation)
 {
 	var topScore = 0;
 	var vaultIdx = -1;
