@@ -16,10 +16,9 @@
 	],
 	"permissions": [
 		"*://am6.nl/morepass/*",
+		"tabs",
 		"activeTab",
-		"storage",
-		"webRequest",
-		"webRequestBlocking"
+		"storage"
 	],
 	"browser_action": {
 		"default_icon": "icons/logo-32.png",
@@ -27,6 +26,7 @@
 		"default_popup": "popup.html"
 	},
 	"background": {
-		"scripts": ["background.js"]
+		"scripts": ["background.js"],
+		"persistent": false
 	}
 }
