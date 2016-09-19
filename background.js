@@ -51,7 +51,7 @@
 				chrome.browserAction.setBadgeText({text: "1"});
 				let username = request.username;
 				let password = request.password;
-				//FIXME: store these credentials somewhere for the popup to use.
+				//FIXME: store these credentials in vault.unsaved
 			}
 		}
 		else //from popup

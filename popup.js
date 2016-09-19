@@ -119,18 +119,18 @@ function fillSitesetSelect(dta)
 {
 	let frag = document.createDocumentFragment();
 //console.log(dta);
-	for (let i = -1; i < dta.length; i++)
+	for (let i = 0; i < dta.length; i++)
 	{
 		let opt = document.createElement("option");
 		opt.value = i;
-		opt.appendChild(document.createTextNode(i == -1 ? "* Add new site *" : dta[i][0].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
+		opt.appendChild(document.createTextNode(dta[i][0].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
 		frag.appendChild(opt);
 	}
-	let select = document.querySelector('form#site>label>select');
+	let select = document.querySelector('optgroup#ssSaved');
 	while (select.hasChildNodes())
 		select.removeChild(select.lastChild);
 	select.appendChild(frag);
-	onSitesetSelectChange({target: select});
+	onSitesetSelectChange({target: select.parentNode});
 }
 
 
