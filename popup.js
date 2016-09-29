@@ -13,7 +13,7 @@ function init()
 				let currentTab = tabs[0];
 
 				let tabLocation = new URL(currentTab.url);
-				document.querySelector('form#site>div>div>input').value = getBaseDomain(tabLocation.hostname);
+				document.querySelector('form#site>div>div>input').value = tlds.getBaseDomain(tabLocation.hostname);
 				let topScoreIdx = getTopScoreIdx(vault, tabLocation);
 
 				if (topScoreIdx > -1)
@@ -97,15 +97,7 @@ function onSitesetSaveClick(evt)
 		let host = urlDivs[i].querySelector('input[name="host"]').value;
 		if (urlDivs[i].classList.contains("on") && host != "")
 		{
-			let url = new URL('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value);
-			let site = {hostname: url.hostname};
-			if (url.pathname.length > 1)
-				site.pathname = url.pathname.substring(1);
-			if (url.port.length > 0)
-				site.port = url.port.substring(1);
-			if (url.search.length > 0)
-				site.search = url.search.substring(1);
-			entry[0].push(site);
+			entry[0].push(getUrlFromHref('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value));
 		}
 	}
 	var selectValue = document.querySelector('form#site>label>select').value;

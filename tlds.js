@@ -8040,7 +8040,7 @@ let tlds = [
 "yolasite.com",
 "za.net",
 "za.org"
-]
+];
 let getBaseDomainByTld = function(hostname, tld)
 {
 	var pos = hostname.lastIndexOf(".", hostname.length - tld.length - 2);
@@ -8058,4 +8058,7 @@ function getBaseDomain(hostname)
 	}
 	return getBaseDomainByTld(hostname, longestMatchingTld);
 };
+
+window.tlds = {"getBaseDomain": getBaseDomain};
+
 }
