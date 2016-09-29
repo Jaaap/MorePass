@@ -24,7 +24,7 @@ function onLoginformSubmit(evt)
 	//FIXME: don't do this when the popup is submiting this form
 	let passwordInput = getPasswordInput();
 	let usernameInput = getUsernameInput(passwordInput) || {value:null};
-	chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value}, function(response) {
+	chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value, docuhref: document.location.href }, function(response) {
 		console.log(response);
 	});
 }

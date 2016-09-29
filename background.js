@@ -47,11 +47,9 @@
 		{
 			if (request.action === "submit")
 			{
-				//chrome.browserAction.show(sender.tab.id);
+				//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
 				chrome.browserAction.setBadgeText({text: "1"});
-				let username = request.username;
-				let password = request.password;
-				//FIXME: store these credentials in vault.unsaved
+				let siteset = [[getUrlFromHref(request.docuhref)], request.username, request.password];
 			}
 		}
 		else //from popup
