@@ -34,7 +34,7 @@ b:active:hover { box-shadow: 0 0 4px 2px white; }
 	</form>
 	<form id="site">
 		<h2>Website</h2>
-		<label><span></span><select name="siteset"><optgroup label="New" id="ssNew"><option value="-1">* Add new site manually *</option></optgroup><optgroup label="Saved" id="ssSaved"></optgroup></select></label>
+		<label><span></span><select name="siteset"><option value="-1">* Add new site manually *</option><optgroup label="New / Unsaved" id="ssNew"></optgroup><optgroup label="Saved" id="ssSaved"></optgroup></select></label>
 		<div>
 			<div class="url on"><span>Url</span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
 			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
@@ -60,6 +60,11 @@ b:active:hover { box-shadow: 0 0 4px 2px white; }
 		<label><span>Username</span><input type="text" name="username"/></label>
 		<label><span>Password</span><input type="password" name="password"/></label>
 		<label><span></span><button type="button">Save site</button> <button type="button">Delete site</button></label>
+	</form>
+	<form id="imprt">
+		<h2>Import</h2>
+		<input type="file" id="importFile"/>
+		<button type="button">Import file</button>
 	</form>
 </body>
 </html>
