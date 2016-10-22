@@ -40,6 +40,7 @@ function init()
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
 	document.querySelector('form#site>label>button').addEventListener("click", onSitesetSaveClick, false);
+	document.querySelector('form#imprt>button').addEventListener("click", onImportSaveClick, false);
 }
 
 
@@ -49,7 +50,7 @@ function onSitesetSelectChange(evt)
 
 	let nrOfSites = 0;
 	let urlDivs = document.querySelectorAll('div>div.url');
-	if (select.value >= 0)
+	if (select.value && select.value >= 0)
 	{
 		chrome.runtime.sendMessage({action: "vault.get"}, function(vault) {
 			let siteset = vault[select.value];
@@ -107,22 +108,44 @@ function onSitesetSaveClick(evt)
 		chrome.runtime.sendMessage({action: "vault.add", siteset: entry}, function(vault) { fillSitesetSelect(vault); });
 }
 
+function onImportSaveClick(evt)
+{
+	let fileInput = document.getElementById('importFile');
+	if ('files' in fileInput)
+	{
+		if (fileInput.files.length == 1)
+		{
+			let file = fileInput.files[0];
+			let reader = new FileReader();
+			reader.addEventListener("load", function(){
+				//FIXME: test the file contents for validity
+				chrome.runtime.sendMessage({action: "vault.imprt", vault: JSON.parse(reader.result)});
+			});
+			reader.readAsText(file);
+		}
+	}
+}
+
 function fillSitesetSelect(dta)
 {
-	let frag = document.createDocumentFragment();
+	let frags = [document.createDocumentFragment(), document.createDocumentFragment()];
 //console.log(dta);
 	for (let i = 0; i < dta.length; i++)
 	{
 		let opt = document.createElement("option");
 		opt.value = i;
 		opt.appendChild(document.createTextNode(dta[i][0].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
-		frag.appendChild(opt);
+		frags[dta[i][3]].appendChild(opt);
 	}
-	let select = document.querySelector('optgroup#ssSaved');
-	while (select.hasChildNodes())
-		select.removeChild(select.lastChild);
-	select.appendChild(frag);
-	onSitesetSelectChange({target: select.parentNode});
+	let optGroup0 = document.querySelector('optgroup#ssNew');
+	while (optGroup0.hasChildNodes())
+		optGroup0.removeChild(optGroup0.lastChild);
+	optGroup0.appendChild(frags[0]);
+	let optGroup1 = document.querySelector('optgroup#ssSaved');
+	while (optGroup1.hasChildNodes())
+		optGroup1.removeChild(optGroup1.lastChild);
+	optGroup1.appendChild(frags[1]);
+	onSitesetSelectChange({target: optGroup0.parentNode});
 }
 
 
