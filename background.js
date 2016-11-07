@@ -69,7 +69,10 @@
 			}
 			else if (request.action === "vault.add")
 			{
-				sendResponse(vaultObj.add(request.siteset));
+				let ss = request.siteset;
+				if (ss.length <= 3)
+					ss[3] = SAVED;
+				sendResponse(vaultObj.add(ss));
 			}
 			else if (request.action === "vault.imprt")
 			{
@@ -92,8 +95,8 @@ var target = "<all_urls>";
 
 
 	chrome.browserAction.onClicked.addListener(function(){ console.log("browserAction.onClicked"); });
-	chrome.runtime.onInstalled.addListener(function(){ console.log("runtime.onInstalled"); });
-	chrome.runtime.onStartup.addListener(function(){ console.log("runtime.onStartup"); });
+	if ("onInstalled" in chrome.runtime) chrome.runtime.onInstalled.addListener(function(){ console.log("runtime.onInstalled"); });
+	if ("onStartup" in chrome.runtime) chrome.runtime.onStartup.addListener(function(){ console.log("runtime.onStartup"); });
 	chrome.tabs.onUpdated.addListener(function(){ console.log("tabs.onUpdated"); });
 
 }

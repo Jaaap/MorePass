@@ -135,7 +135,8 @@ function fillSitesetSelect(dta)
 		let opt = document.createElement("option");
 		opt.value = i;
 		opt.appendChild(document.createTextNode(dta[i][0].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
-		frags[dta[i][3]].appendChild(opt);
+		if (dta[i].length > 3)
+			frags[dta[i][3]].appendChild(opt);
 	}
 	let optGroup0 = document.querySelector('optgroup#ssNew');
 	while (optGroup0.hasChildNodes())
