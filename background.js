@@ -20,19 +20,13 @@
 		},
 		add: function(siteset) {
 			this.vault.push(siteset);
-			this.vault.sort(function(aa,bb){
-				let a = aa[0][0].hostname;
-				let b = bb[0][0].hostname;
-				if (aa[3] == bb[3])
-					return (a < b ? -1 : +(a > b));
-				else
-					return aa[3] < bb[3] ? -1 : 1;
-			});
+			this.vault.sort(vaultSort);
 			return this.save();
 		},
 		edit: function(idx, siteset) {
 			siteset[3] = SAVED;
 			this.vault[idx] = siteset;
+			this.vault.sort(vaultSort);
 			return this.save();
 		},
 		del: function(idx) {
@@ -41,6 +35,7 @@
 		},
 		imprt: function(newVault) {
 			this.vault = newVault;
+			this.vault.sort(vaultSort);
 			return this.save();
 		},
 		save: function() {
@@ -81,6 +76,10 @@
 			else if (request.action === "vault.edit")
 			{
 				sendResponse(vaultObj.edit(request.idx, request.siteset));
+			}
+			else if (request.action === "vault.del")
+			{
+				sendResponse(vaultObj.del(request.idx));
 			}
 		}
 	});
