@@ -7,7 +7,7 @@
 <script src="popup.js" defer></script>
 <title>MorePass</title>
 <style>
-body { font-size: 100%; font-family: Verdana, Helvetica; background: radial-gradient(ellipse at center center, #34749c 0%, #2a6085 41%, #1d3f59 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 300px; width: 30em; }
+body { font-size: 100%; font-family: Verdana, Helvetica; background: radial-gradient(ellipse at center center, #34749c 0%, #2a6085 41%, #1d3f59 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 500px; width: 30em; }
 label,div { display: inline-block; width: 27.2em; }
 label,div.url { padding: 2px 0; }
 div.url { display: none; }
@@ -24,6 +24,7 @@ input[name="host"] { width: 12em; }
 input[name="path"] { width: 7em; }
 b { display:inline-block; width: 15px; padding-left: 3px; height: 18px; vertical-align: text-bottom; margin: 5px 0 0 4px; border-radius: 9px; cursor: pointer; background-color: #4BBC33; line-height: 17px; font-size: 13px; }
 b:active:hover { box-shadow: 0 0 4px 2px white; }
+textarea { width: calc(100% - 16px); height: 8em;}
 </style>
 </head>
 <body>
@@ -59,12 +60,12 @@ b:active:hover { box-shadow: 0 0 4px 2px white; }
 		</div><b title="Add another site with the same credentials (like ebay.com, ebay.ca, ebay.de)">+</b>
 		<label><span>Username</span><input type="text" name="username"/></label>
 		<label><span>Password</span><input type="password" name="password"/></label>
-		<label><span></span><button type="button">Save site</button> <button type="button">Delete site</button></label>
+		<label><span></span><button type="button" class="save">Save site</button> <button type="button" class="del">Delete site</button></label>
 	</form>
 	<form id="imprt">
 		<h2>Import</h2>
-		<input type="file" id="importFile"/>
-		<button type="button">Import file</button>
+		<textarea></textarea>
+		<button type="button">Import CSV</button>
 	</form>
 </body>
 </html>

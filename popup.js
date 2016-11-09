@@ -39,7 +39,8 @@ function init()
 
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
-	document.querySelector('form#site>label>button').addEventListener("click", onSitesetSaveClick, false);
+	document.querySelector('form#site>label>button.save').addEventListener("click", onSitesetSaveClick, false);
+	document.querySelector('form#site>label>button.del').addEventListener("click", onSitesetDeleteClick, false);
 	document.querySelector('form#imprt>button').addEventListener("click", onImportSaveClick, false);
 }
 
@@ -101,15 +102,71 @@ function onSitesetSaveClick(evt)
 			entry[0].push(getUrlFromHref('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value));
 		}
 	}
-	var selectValue = document.querySelector('form#site>label>select').value;
+	let selectValue = document.querySelector('form#site>label>select').value;
 	if (selectValue >= 0)
 		chrome.runtime.sendMessage({action: "vault.edit", siteset: entry, idx: selectValue}, function(vault) { fillSitesetSelect(vault); });
 	else
 		chrome.runtime.sendMessage({action: "vault.add", siteset: entry}, function(vault) { fillSitesetSelect(vault); });
 }
+function onSitesetDeleteClick(evt)
+{
+	let selectValue = document.querySelector('form#site>label>select').value;
+	chrome.runtime.sendMessage({action: "vault.del", idx: selectValue}, function(vault) { fillSitesetSelect(vault); });
+}
 
 function onImportSaveClick(evt)
 {
+	let ta = document.querySelector('#imprt textarea');
+	if (ta && ta.value && ta.value.indexOf('url,username,password,') == 0) // LastPass style
+	{
+		let uup = parseCSV(ta.value);
+		let preVault = [];
+		for (let i = 1; i < uup.length; i++)
+		{
+			let line = uup[i];
+			if (line.length > 2)
+			{
+				let url = getUrlFromHref(line[0]);
+				preVault.push([tlds.getBaseDomain(url.hostname), [url], line[1], line[2]]);
+			}
+		}
+		//step 1: clean urls if there are no other entries with same base domain
+		for (let i = 0; i < preVault.length; i++)
+		{
+			let baseDomainSeen = false;
+			for (let j = 0; j < preVault.length; j++)
+			{
+				if (i != j && preVault[i][0] == preVault[j][0])
+					baseDomainSeen = true;
+			}
+			if (!baseDomainSeen)
+			{
+				preVault[i][1][0] = {"hostname": preVault[i][0]};
+			}
+		}
+		//step 2: merge entries with same credentials
+		for (let i = 0; i < preVault.length; i++)
+		{
+			for (let j = 0; j < preVault.length; j++)
+			{
+				if (i != j && preVault[i][2] == preVault[j][2] && preVault[i][3] == preVault[j][3])
+				{
+					//merge i and j
+					[].push.apply(preVault[i][1], preVault[j][1]);
+					preVault.splice(j, 1);
+					j--;
+				}
+			}
+		}
+		let vault = [];
+		for (let i = 0; i < preVault.length; i++)
+		{
+			vault.push([preVault[i][1], preVault[i][2], preVault[i][3], 1]);
+		}
+		chrome.runtime.sendMessage({"action": "vault.imprt", "vault": vault});
+		ta.value = "";//JSON.stringify(preVault);
+	}
+/*
 	let fileInput = document.getElementById('importFile');
 	if ('files' in fileInput)
 	{
@@ -124,6 +181,7 @@ function onImportSaveClick(evt)
 			reader.readAsText(file);
 		}
 	}
+*/
 }
 
 function fillSitesetSelect(dta)
@@ -152,14 +210,14 @@ function fillSitesetSelect(dta)
 
 function getTopScoreIdx(vault, tabLocation)
 {
-	var topScore = 0;
-	var vaultIdx = -1;
-	for (var i = 0; i < vault.length; i++)
+	let topScore = 0;
+	let vaultIdx = -1;
+	for (let i = 0; i < vault.length; i++)
 	{
-		var bookmarks = vault[i][0];
-		for (var j = 0; j < bookmarks.length; j++)
+		let bookmarks = vault[i][0];
+		for (let j = 0; j < bookmarks.length; j++)
 		{
-			var score = getLocationMatchScore(tabLocation, bookmarks[j]);
+			let score = getLocationMatchScore(tabLocation, bookmarks[j]);
 			if (score > topScore)
 			{
 				topScore = score;
@@ -169,7 +227,7 @@ function getTopScoreIdx(vault, tabLocation)
 	}
 	if (topScore > 0)
 	{
-		console.log("getTopScoreIdx", topScore, vault[vaultIdx][0]);
+		//console.log("getTopScoreIdx", topScore, vault[vaultIdx][0]);
 		return vaultIdx;
 	}
 }

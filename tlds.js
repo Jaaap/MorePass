@@ -8043,14 +8043,16 @@ let tlds = [
 ];
 let getBaseDomainByTld = function(hostname, tld)
 {
-	var pos = hostname.lastIndexOf(".", hostname.length - tld.length - 2);
-	console.log(hostname,tld, pos, hostname.length - tld.length);
+	if (tld == "")
+		return hostname;
+	let pos = hostname.lastIndexOf(".", hostname.length - tld.length - 2);
+	//console.log(hostname,tld, pos, hostname.length - tld.length);
 	return hostname.substr(pos+1);
 }
 function getBaseDomain(hostname)
 {
-	var longestMatchingTld = "";
-	for (var i = 0, len = tlds.length; i < len; i++)
+	let longestMatchingTld = "";
+	for (let i = 0, len = tlds.length; i < len; i++)
 	{
 		if (hostname.endsWith(tlds[i])) //FIXME: apply the * and ! rules too
 			if (tlds[i].length > longestMatchingTld.length)
