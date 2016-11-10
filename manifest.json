@@ -4,6 +4,11 @@
 	"name": "MorePass",
 	"version": "0.0.1",
 	"homepage_url": "https://jaaap.github.io/MorePass/",
+	"applications": {
+		"gecko": {
+			"id": "morepass@am6.nl"
+		}
+	},
 	"icons": {
 		"64": "icons/logo-64.png"
 	},
