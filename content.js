@@ -47,7 +47,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 				usernameInput.value = message.user;
 			else
 				console.error("Unable to find usernameInput from passwordInput", passwordInput);
-			passwordInput.form.submit();
+			//passwordInput.form.submit();
 			return sendResponse(true);
 		}
 		return sendResponse(false);
