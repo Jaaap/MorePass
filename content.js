@@ -7,9 +7,9 @@ function getPasswordInput()
 function getUsernameInput(passwordInput)
 {
 	let formElems = passwordInput.form.elements;
-	let i = formElems.length;
+	let i = formElems.length - 1;
 	let passSeen = false;
-	while (--i)
+	while (i--)
 	{
 		if (passSeen)
 			if (formElems[i].type === "text")

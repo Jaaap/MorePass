@@ -1,5 +1,6 @@
 (function(){
 'use strict';
+const UNSAVED = 0, SAVED = 1;
 
 function init()
 {
@@ -214,14 +215,19 @@ function getTopScoreIdx(vault, tabLocation)
 	let vaultIdx = -1;
 	for (let i = 0; i < vault.length; i++)
 	{
-		let bookmarks = vault[i][0];
-		for (let j = 0; j < bookmarks.length; j++)
+		if (vault[i][3] == SAVED)
 		{
-			let score = getLocationMatchScore(tabLocation, bookmarks[j]);
-			if (score > topScore)
+			let bookmarks = vault[i][0];
+			for (let j = 0; j < bookmarks.length; j++)
 			{
-				topScore = score;
-				vaultIdx = i;
+				let score = getLocationMatchScore(tabLocation, bookmarks[j]);
+				if (score > topScore)
+				{
+					topScore = score;
+					vaultIdx = i;
+				}
+				if (score > 0)
+					console.log("Score", score, i, bookmarks[j]);
 			}
 		}
 	}
