@@ -53,7 +53,9 @@
 			{
 				//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
 				chrome.browserAction.setBadgeText({text: "*"});
-				let siteset = [[getUrlFromHref(request.docuhref)], request.username, request.password, UNSAVED];
+				let url = getUrlFromHref(request.docuhref);
+				let baseDomain = tlds.getBaseDomain(url.hostname);
+				let siteset = [[{"hostname": baseDomain}], request.username, request.password, UNSAVED];
 				vaultObj.add(siteset);
 			}
 		}
