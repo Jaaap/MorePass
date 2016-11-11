@@ -164,8 +164,9 @@ function onImportSaveClick(evt)
 		{
 			vault.push([preVault[i][1], preVault[i][2], preVault[i][3], 1]);
 		}
-		chrome.runtime.sendMessage({"action": "vault.imprt", "vault": vault});
+		chrome.runtime.sendMessage({"action": "vault.imprt", "vault": vault}, function(vault) { fillSitesetSelect(vault); });
 		ta.value = "";//JSON.stringify(preVault);
+		alert("Import successful");
 	}
 /*
 	let fileInput = document.getElementById('importFile');
