@@ -7,7 +7,7 @@ function getPasswordInput()
 function getUsernameInput(passwordInput)
 {
 	let formElems = passwordInput.form.elements;
-	let i = formElems.length - 1;
+	let i = formElems.length;
 	let passSeen = false;
 	while (i--)
 	{
@@ -48,6 +48,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 			else
 				console.error("Unable to find usernameInput from passwordInput", passwordInput);
 			//passwordInput.form.submit();
+			//FIXME: find the submit button or input and click it
 			return sendResponse(true);
 		}
 		return sendResponse(false);
