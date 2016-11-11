@@ -52,8 +52,9 @@
 			if (request.action === "submit")
 			{
 				//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
-				chrome.browserAction.setBadgeText({text: "1"});
+				chrome.browserAction.setBadgeText({text: "*"});
 				let siteset = [[getUrlFromHref(request.docuhref)], request.username, request.password, UNSAVED];
+				vaultObj.add(siteset);
 			}
 		}
 		else //from popup
@@ -76,10 +77,16 @@
 			else if (request.action === "vault.edit")
 			{
 				sendResponse(vaultObj.edit(request.idx, request.siteset));
+				chrome.browserAction.setBadgeText({text: ""});
 			}
 			else if (request.action === "vault.del")
 			{
 				sendResponse(vaultObj.del(request.idx));
+				chrome.browserAction.setBadgeText({text: ""});
+			}
+			else
+			{
+				console.log("Unknown action", request.action);
 			}
 		}
 	});
