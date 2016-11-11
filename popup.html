@@ -5,26 +5,30 @@
 <script src="tlds.js" defer></script>
 <script src="utils.js" defer></script>
 <script src="popup.js" defer></script>
-<title>MorePass</title>
+<title>pass.dog</title>
 <style>
-body { font-size: 100%; font-family: Verdana, Helvetica; background: radial-gradient(ellipse at center center, #34749c 0%, #2a6085 41%, #1d3f59 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 500px; width: 30em; }
-label,div { display: inline-block; width: 27.2em; }
+body { font-size: 100%; font-family: Verdana, Helvetica; background: radial-gradient(ellipse at center center, #8B4513 0%, #420 60%, #210 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 350px; width: 30em; margin: 8px; }
+h2 { margin: 0 0 4px 0; }
+form#imprt { margin-top: 1em; }
+label,i { display: block; width: calc(100% - 32px); }
+div.more { display: inline-block; width: calc(100% - 32px); }
+textarea { width: calc(100% - 38px); height: 100px; }
+select { width: calc(100% - 123px); font-size: 15px; }
+span { display: inline-block; width: 120px; }
+div.url>span { width: 57px; }
+input[type=text],input[type=password],button { width: calc(100% - 130px); }
+input[name="host"],input[name="path"] { width: calc(50% - 72px); }
+
 label,div.url { padding: 2px 0; }
 div.url { display: none; }
-div.url.on { display: inline-block; }
-span { display: inline-block; width: 8em; }
-div.url>span { width: 4.1em; }
+div.url.on { display: block; }
 s { text-decoration: none; color: #AAA; }
-select { width: calc(20em + 6px); font-size: 15px; }
-input[type=text],input[type=password],button { font-size: 15px; width: 20em; padding-left: 4px; border-radius: 4px; border: 1px solid #CCC; }
-button { width: auto; color: #FFF; background-image: linear-gradient(to bottom, #86c8f1, #2c7db1); text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25); 0 1px 0 rgba(255, 255, 255, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.05); border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25) rgba(0, 0, 0, 0.5) rgba(0, 0, 0, 0.1); }
-button:active:hover { background-image: linear-gradient(to top, #86c8f1, #2c7db1); }
-input:focus { box-shadow: 0 0 8px 2px white; outline: 0 none; }
-input[name="host"] { width: 12em; }
-input[name="path"] { width: 7em; }
+button { width: auto; color: #420; font-weight: bold; background-image: linear-gradient(to bottom, #FFF, #DDD); border-color: #000; }
+button:hover { background-image: linear-gradient(to top, #FFF, #DDD); }
+button:active { color: red; }
+input[type=text],input[type=password],button { font-size: 15px; padding-left: 4px; border-radius: 4px; border: 1px solid #CCC; }
 b { display:inline-block; width: 15px; padding-left: 3px; height: 18px; vertical-align: text-bottom; margin: 5px 0 0 4px; border-radius: 9px; cursor: pointer; background-color: #4BBC33; line-height: 17px; font-size: 13px; }
 b:active:hover { box-shadow: 0 0 4px 2px white; }
-textarea { width: calc(100% - 16px); height: 8em;}
 </style>
 </head>
 <body>
@@ -34,9 +38,9 @@ textarea { width: calc(100% - 16px); height: 8em;}
 		<label><span></span><button type="button">Decrypt the password vault</button></label>
 	</form>
 	<form id="site">
-		<h2>Website</h2>
+		<h2>Websites</h2>
 		<label><span></span><select name="siteset"><option value="-1">* Add new site manually *</option><optgroup label="New / Unsaved" id="ssNew"></optgroup><optgroup label="Saved" id="ssSaved"></optgroup></select></label>
-		<div>
+		<div class="more">
 			<div class="url on"><span>Url</span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
 			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
 			<div class="url"><span></span>http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
@@ -60,7 +64,7 @@ textarea { width: calc(100% - 16px); height: 8em;}
 		</div><b title="Add another site with the same credentials (like ebay.com, ebay.ca, ebay.de)">+</b>
 		<label><span>Username</span><input type="text" name="username"/></label>
 		<label><span>Password</span><input type="password" name="password"/></label>
-		<label><span></span><button type="button" class="save">Save site</button> <button type="button" class="del">Delete site</button></label>
+		<i><span></span><button type="button" class="save">Save site</button> <button type="button" class="del">Delete site</button></i>
 	</form>
 	<form id="imprt">
 		<h2>Import LastPass CSV</h2>
