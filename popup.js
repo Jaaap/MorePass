@@ -242,9 +242,9 @@ function getLocationMatchScore(tabLoc, bmLoc)
 {
 	let score = 0;
 	if (tabLoc.hostname === bmLoc.hostname)
-		score += 20;
+		score += 20 + bmLoc.hostname.length;
 	else if (tabLoc.hostname.endsWith(bmLoc.hostname))
-		score += 10;
+		score += 10 + bmLoc.hostname.length;
 	if (score > 0)
 	{
 		if (bmLoc.port && tabLoc.port === bmLoc.port)
