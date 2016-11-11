@@ -1,12 +1,12 @@
 {
-	"description": "MorePass password manager",
+	"description": "pass.dog password manager",
 	"manifest_version": 2,
-	"name": "MorePass",
+	"name": "pass.dog",
 	"version": "0.0.1",
-	"homepage_url": "https://jaaap.github.io/MorePass/",
+	"homepage_url": "https://jaaap.github.io/pass.dog/",
 	"applications": {
 		"gecko": {
-			"id": "morepass@am6.nl"
+			"id": "info@pass.dog"
 		}
 	},
 	"icons": {
@@ -20,14 +20,14 @@
 		}
 	],
 	"permissions": [
-		"*://am6.nl/morepass/*",
+		"*://pass.dog/*",
 		"tabs",
 		"activeTab",
 		"storage"
 	],
 	"browser_action": {
 		"default_icon": "icons/icon-256.png",
-		"default_title": "MorePass",
+		"default_title": "pass.dog",
 		"default_popup": "popup.html"
 	},
 	"background": {
