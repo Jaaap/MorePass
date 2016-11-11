@@ -1,5 +1,7 @@
 (function(){
 
+let isUnknownCredentials = true;
+
 function getPasswordInput()
 {
 	return document.querySelector('form[method="post" i] input[type="password"]');
@@ -21,12 +23,12 @@ function getUsernameInput(passwordInput)
 
 function onLoginformSubmit(evt)
 {
-	//FIXME: don't do this when the popup is submiting this form
-	let passwordInput = getPasswordInput();
-	let usernameInput = getUsernameInput(passwordInput) || {value:null};
-	chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value, docuhref: document.location.href }, function(response) {
-		console.log(response);
-	});
+	if (isUnknownCredentials)
+	{
+		let passwordInput = getPasswordInput();
+		let usernameInput = getUsernameInput(passwordInput) || {value:null};
+		chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value, docuhref: document.location.href }, function(response) { console.log(response); });
+	}
 }
 
 /* messaging */
@@ -41,6 +43,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 		let passwordInput = getPasswordInput();
 		if (passwordInput != null)
 		{
+			isUnknownCredentials = false;
 			passwordInput.value = message.pass;
 			let usernameInput = getUsernameInput(passwordInput);
 			if (usernameInput)
@@ -60,7 +63,10 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 let passwordInput = getPasswordInput();
 if (passwordInput)
 {
-	passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
+	//FIXME more: don't do this for banks, ideal, DigID, Paypal etc
+	//FIXME: check form action too, might be a different domain.
+	if (!/\b(paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]+$/i.test(document.location.hostname))
+		passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
 }
 
 
