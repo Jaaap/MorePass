@@ -14,7 +14,7 @@ function getUsernameInput(passwordInput)
 	while (i--)
 	{
 		if (passSeen)
-			if (formElems[i].type === "text")
+			if (formElems[i].type === "text" || formElems[i].type === "email")
 				return formElems[i];
 		if (formElems[i] == passwordInput)
 			passSeen = true;
