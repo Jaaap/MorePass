@@ -40,8 +40,8 @@ function init()
 
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
-	document.querySelector('form#site>label>button.save').addEventListener("click", onSitesetSaveClick, false);
-	document.querySelector('form#site>label>button.del').addEventListener("click", onSitesetDeleteClick, false);
+	document.querySelector('form#site>i>button.save').addEventListener("click", onSitesetSaveClick, false);
+	document.querySelector('form#site>i>button.del').addEventListener("click", onSitesetDeleteClick, false);
 	document.querySelector('form#imprt>button').addEventListener("click", onImportSaveClick, false);
 }
 
