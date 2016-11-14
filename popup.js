@@ -159,6 +159,7 @@ function onImportSaveClick(evt)
 				}
 			}
 		}
+		//FIXME: merge existing vault
 		let vault = [];
 		for (let i = 0; i < preVault.length; i++)
 		{
