@@ -2,6 +2,12 @@
 
 let isUnknownCredentials = true;
 
+function triggerEvent(elem, eventType)
+{
+	let evt = new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': true });
+	return !elem.dispatchEvent(evt);
+}
+
 function getPasswordInput()
 {
 	return document.querySelector('form[method="post" i] input[type="password"]');
@@ -19,6 +25,10 @@ function getUsernameInput(passwordInput)
 		if (formElems[i] == passwordInput)
 			passSeen = true;
 	}
+}
+function getSubmitButton(passwordInput)
+{
+	return passwordInput.form.querySelector('input[type="submit"],button[type="submit"]');
 }
 
 function onLoginformSubmit(evt)
@@ -47,11 +57,15 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 			passwordInput.value = message.pass;
 			let usernameInput = getUsernameInput(passwordInput);
 			if (usernameInput)
+			{
 				usernameInput.value = message.user;
+				//FIXME: find checkboxes named autologin or stayloggedin or keepcookie or rememberme and check them
+				let submitButton = getSubmitButton(passwordInput);
+				if (submitButton)
+					triggerEvent(submitButton, "click");
+			}
 			else
 				console.error("Unable to find usernameInput from passwordInput", passwordInput);
-			//passwordInput.form.submit();
-			//FIXME: find the submit button or input and click it
 			return sendResponse(true);
 		}
 		return sendResponse(false);
