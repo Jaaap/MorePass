@@ -251,7 +251,7 @@ function getLocationMatchScore(tabLoc, bmLoc)
 	{
 		if (bmLoc.port && tabLoc.port === bmLoc.port)
 			score += 9;
-		if (bmLoc.pathname && tabLoc.pathname.startsWith(bmLoc.pathname))
+		if (bmLoc.pathname && tabLoc.pathname.startsWith("/"+bmLoc.pathname))
 			score += 5 + Math.log(bmLoc.pathname.length);
 		if (bmLoc.search && tabLoc.search === bmLoc.search)
 			score += 2;
