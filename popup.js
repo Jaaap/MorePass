@@ -7,7 +7,6 @@ function init()
 	if ("chrome" in window)
 	{
 		chrome.runtime.sendMessage({action: "vault.get"}, function(vault) {
-			console.log(1, vault);
 			fillSitesetSelect(vault);
 
 			chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
@@ -190,7 +189,6 @@ function onImportSaveClick(evt)
 function fillSitesetSelect(dta)
 {
 	let frags = [document.createDocumentFragment(), document.createDocumentFragment()];
-//console.log(dta);
 	for (let i = 0; i < dta.length; i++)
 	{
 		let opt = document.createElement("option");
@@ -234,10 +232,7 @@ function getTopScoreIdx(vault, tabLocation)
 		}
 	}
 	if (topScore > 0)
-	{
-		//console.log("getTopScoreIdx", topScore, vault[vaultIdx][0]);
 		return vaultIdx;
-	}
 }
 
 function getLocationMatchScore(tabLoc, bmLoc)
@@ -256,7 +251,6 @@ function getLocationMatchScore(tabLoc, bmLoc)
 		if (bmLoc.search && tabLoc.search === bmLoc.search)
 			score += 2;
 	}
-//console.log(bmLoc.hostname, score);
 	return score;
 }
 

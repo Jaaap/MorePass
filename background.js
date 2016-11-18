@@ -9,9 +9,7 @@
 		this.vault = [];
 		chrome.storage.local.get("vault", function(result){
 			self.vault = result.vault||[];
-			console.log(999);
 		});
-		console.log(this.vault);
 	}
 
 	Vault.prototype = {
@@ -88,7 +86,7 @@
 			}
 			else
 			{
-				console.log("Unknown action", request.action);
+				console.warn("Unknown action", request.action);
 			}
 		}
 	});
@@ -102,9 +100,11 @@ var target = "<all_urls>";
 
 
 
+/*
 	chrome.browserAction.onClicked.addListener(function(){ console.log("browserAction.onClicked"); });
 	if ("onInstalled" in chrome.runtime) chrome.runtime.onInstalled.addListener(function(){ console.log("runtime.onInstalled"); });
 	if ("onStartup" in chrome.runtime) chrome.runtime.onStartup.addListener(function(){ console.log("runtime.onStartup"); });
 	chrome.tabs.onUpdated.addListener(function(){ console.log("tabs.onUpdated"); });
+*/
 
 }
