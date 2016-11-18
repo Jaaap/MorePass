@@ -30,6 +30,18 @@ function getSubmitButton(passwordInput)
 {
 	return passwordInput.form.querySelector('input[type="submit"],button[type="submit"]');
 }
+function getRemembermeCheckbox(passwordInput)
+{
+	let cbs = passwordInput.form.querySelectorAll('input[type="checkbox"]');
+	for (let i = 0; i < cbs.length; i++)
+	{
+		let cb = cbs[i];
+		let name = cb.name + " " + cb.id;
+		//autologin stayloggedin keepcookie rememberme 
+		if (/autologin|remember|cookie/i.test(name))
+			return cb;
+	}
+}
 
 function onLoginformSubmit(evt)
 {
@@ -59,7 +71,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 			if (usernameInput)
 			{
 				usernameInput.value = message.user;
-				//FIXME: find checkboxes named autologin or stayloggedin or keepcookie or rememberme and check them
+				let remembermeCheckbox = getRemembermeCheckbox(passwordInput);
+				if (remembermeCheckbox)
+					remembermeCheckbox.checked = true;
 				let submitButton = getSubmitButton(passwordInput);
 				if (submitButton)
 					triggerEvent(submitButton, "click");
