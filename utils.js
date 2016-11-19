@@ -40,3 +40,13 @@ function vaultSort(aa,bb)
 	else
 		return aa[3] < bb[3] ? -1 : 1;
 }
+function getMatchingSubstringLength(a, b)
+{
+	let max = Math.min(a.length,b.length);
+	for (let i = 0; i < max; i++)
+	{
+		if (a[i] !== b[i])
+			return i;
+	}
+	return 0;
+}

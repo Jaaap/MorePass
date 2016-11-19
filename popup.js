@@ -246,10 +246,15 @@ function getLocationMatchScore(tabLoc, bmLoc)
 	{
 		if (bmLoc.port && tabLoc.port === bmLoc.port)
 			score += 9;
-		if (bmLoc.pathname && tabLoc.pathname.startsWith("/"+bmLoc.pathname))
-			score += 5 + Math.log(bmLoc.pathname.length);
-		if (bmLoc.search && tabLoc.search === bmLoc.search)
-			score += 2;
+		if (bmLoc.pathname && bmLoc.pathname)
+		{
+			if (tabLoc.pathname.startsWith("/"+bmLoc.pathname))
+				score += 5 + Math.log(bmLoc.pathname.length + 1);
+			else
+				score += 1 + Math.log(getMatchingSubstringLength(tabLoc.pathname, "/"+bmLoc.pathname));
+		}
+		if (bmLoc.search && tabLoc.search && tabLoc.search.indexOf(bmLoc.search) > -1)
+			score += 2 + Math.log(bmLoc.search.length);
 	}
 	return score;
 }
