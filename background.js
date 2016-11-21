@@ -2,6 +2,7 @@
 {
 	'use strict';
 	const UNSAVED = 0, SAVED = 1;
+	let credentials = {};
 
 	function Vault()
 	{
@@ -39,10 +40,13 @@
 		save: function() {
 			chrome.storage.local.set({"vault": this.vault});
 			return this.vault;
-		}
+		},
 	};
 
 	let vaultObj = new Vault();
+	chrome.storage.local.get("credentials", function(result){
+		credentials = result||{};
+	});
 
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		if (sender.tab) //from content
@@ -83,6 +87,15 @@
 			{
 				sendResponse(vaultObj.del(request.idx));
 				chrome.browserAction.setBadgeText({text: ""});
+			}
+			else if (request.action === "credentials.set")
+			{
+				credentials = {"email": request.email, "passphrase": request.passphrase};
+				chrome.storage.local.set({"credentials": credentials});
+			}
+			else if (request.action === "credentials.get")
+			{
+				sendResponse(credentials.email);
 			}
 			else
 			{
