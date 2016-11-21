@@ -31,12 +31,16 @@ function init()
 				}
 			});
 		});
+		chrome.runtime.sendMessage({action: "credentials.get"}, function(email) {
+			document.querySelector('form#decrypt input#email').value = email;
+		});
 	}
 	else
 	{
 		console.error("window.chrome not found");
 	}
 
+	document.querySelector('form#decrypt button').addEventListener("click", onDecryptButtonClick, false);
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
 	document.querySelector('form#site>i>button.save').addEventListener("click", onSitesetSaveClick, false);
@@ -44,6 +48,12 @@ function init()
 	document.querySelector('form#imprt>button').addEventListener("click", onImportSaveClick, false);
 }
 
+function onDecryptButtonClick(evt)
+{
+	let email = document.querySelector('form#decrypt input#email').value;
+	let passp = document.querySelector('form#decrypt input#passphrase').value;
+	chrome.runtime.sendMessage({"action": "credentials.set", "email": email, "passphrase": passp}, function(result) { console.log(result); });
+}
 
 function onSitesetSelectChange(evt)
 {
