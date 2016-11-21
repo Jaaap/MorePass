@@ -45,7 +45,7 @@
 
 	let vaultObj = new Vault();
 	chrome.storage.local.get("credentials", function(result){
-		credentials = result||{};
+		credentials = result.credentials;
 	});
 
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
