@@ -74,9 +74,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 				let remembermeCheckbox = getRemembermeCheckbox(passwordInput);
 				if (remembermeCheckbox)
 					remembermeCheckbox.checked = true;
-				let submitButton = getSubmitButton(passwordInput);
-				if (submitButton)
-					triggerEvent(submitButton, "click");
+				if (message.submit)
+				{
+					let submitButton = getSubmitButton(passwordInput);
+					if (submitButton)
+						triggerEvent(submitButton, "click");
+				}
 			}
 			else
 				console.error("Unable to find usernameInput from passwordInput", passwordInput);

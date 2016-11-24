@@ -24,7 +24,9 @@ function init()
 							if (hasLoginForm)
 							{
 								let row = vault[topScoreIdx];
-								chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2] }, function (response) { window.close(); });
+								//FIXME: set submit to false when there is more than one row
+								//i.e. when n other rows score more than 95% of the topScore
+								chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2], submit: true }, function (response) { window.close(); });
 							}
 						}
 					});
