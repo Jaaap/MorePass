@@ -18,7 +18,7 @@ function init()
 
 				if (topScoreIdx > -1)
 				{
-					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (hasLoginForm) {
+					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (hasLoginForm, pageUsernameValue) {
 						if (typeof hasLoginForm !== 'undefined') {
 							console.log("hasLoginForm", hasLoginForm);
 							if (hasLoginForm)
@@ -251,22 +251,22 @@ function getLocationMatchScore(tabLoc, bmLoc)
 {
 	let score = 0;
 	if (tabLoc.hostname === bmLoc.hostname)
-		score += 20 + bmLoc.hostname.length;
+		score += 2000 + bmLoc.hostname.length;
 	else if (tabLoc.hostname.endsWith("." + bmLoc.hostname))
-		score += 10 + bmLoc.hostname.length;
+		score += 1000 + bmLoc.hostname.length;
 	if (score > 0)
 	{
 		if (bmLoc.port && tabLoc.port === bmLoc.port)
-			score += 9;
+			score += 100;
 		if (bmLoc.pathname && bmLoc.pathname)
 		{
 			if (tabLoc.pathname.startsWith("/"+bmLoc.pathname))
-				score += 5 + Math.log(bmLoc.pathname.length + 1);
+				score += 20 + (20 * Math.atan(bmLoc.pathname.length));
 			else
-				score += 1 + Math.log(getMatchingSubstringLength(tabLoc.pathname, "/"+bmLoc.pathname));
+				score += 10 + (10 * Math.atan(getMatchingSubstringLength(tabLoc.pathname, "/"+bmLoc.pathname) - 1)); //don't count the slash
 		}
 		if (bmLoc.search && tabLoc.search && tabLoc.search.indexOf(bmLoc.search) > -1)
-			score += 2 + Math.log(bmLoc.search.length);
+			score += 1 + Math.atan(bmLoc.search.length);
 	}
 	return score;
 }
