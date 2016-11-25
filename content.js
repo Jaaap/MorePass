@@ -28,7 +28,7 @@ function getUsernameInput(passwordInput)
 }
 function getSubmitButton(passwordInput)
 {
-	return passwordInput.form.querySelector('input[type="submit"],button[type="submit"],button:not([type])');
+	return passwordInput.form.querySelector('input[type="submit"],button[type="submit"],button:not([type]),input[type="image"]');
 }
 function getRemembermeCheckbox(passwordInput)
 {
@@ -62,14 +62,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 		if (passwordInput != null)
 		{
 			isUnknownCredentials = false;
-			passwordInput.value = message.pass;
 			let usernameInput = getUsernameInput(passwordInput);
 			if (usernameInput)
-				return sendResponse(true, usernameInput.value);
-			else
-				return sendResponse(true, null);
+				return sendResponse([true, usernameInput.value]);
+			return sendResponse([true, null]);
 		}
-		return sendResponse(getPasswordInput() != null);
+		return sendResponse([false]);
 	}
 	else if (message.type === 'fillLoginForm')
 	{

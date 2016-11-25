@@ -14,19 +14,27 @@ function init()
 
 				let tabLocation = new URL(currentTab.url);
 				document.querySelector('form#site>div>div>input').value = tlds.getBaseDomain(tabLocation.hostname);
-				let topScoreIdx = getTopScoreIdx(vault, tabLocation);
+				let vaultMatches = getVaultMatches(vault, tabLocation);
 
-				if (topScoreIdx > -1)
+				if (vaultMatches.length > 0)
 				{
-					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (hasLoginForm, pageUsernameValue) {
-						if (typeof hasLoginForm !== 'undefined') {
-							console.log("hasLoginForm", hasLoginForm);
+					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (data) {
+						if (typeof data !== 'undefined') {
+							let hasLoginForm = data[0];
+							let pageUsernameValue = data[1];
+							console.log("hasLoginForm", hasLoginForm, pageUsernameValue);
 							if (hasLoginForm)
 							{
-								let row = vault[topScoreIdx];
-								//FIXME: set submit to false when there is more than one row
-								//i.e. when n other rows score more than 95% of the topScore
-								chrome.tabs.sendMessage(currentTab.id, { type: 'fillLoginForm', user: row[1], pass: row[2], submit: true }, function (response) { window.close(); });
+								let i = 0;
+								for (let j = 0; j < vaultMatches.length; j++)
+									if (pageUsernameValue == vaultMatches[j][1])
+										i = j + 1;
+								if (i >= vaultMatches.length)
+									i = 0;
+								let row = vaultMatches[i];
+								if (vaultMatches.length > 1)
+									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
+								chrome.tabs.sendMessage(currentTab.id, {"type": 'fillLoginForm', "user": row[1], "pass": row[2], "submit": vaultMatches.length == 1}, function (response) { window.close(); });
 							}
 						}
 					});
@@ -221,10 +229,10 @@ function fillSitesetSelect(dta)
 }
 
 
-function getTopScoreIdx(vault, tabLocation)
+function getVaultMatches(vault, tabLocation)
 {
 	let topScore = 0;
-	let vaultIdx = -1;
+	let vaultMatches = [];
 	for (let i = 0; i < vault.length; i++)
 	{
 		if (vault[i][3] == SAVED)
@@ -233,18 +241,19 @@ function getTopScoreIdx(vault, tabLocation)
 			for (let j = 0; j < bookmarks.length; j++)
 			{
 				let score = getLocationMatchScore(tabLocation, bookmarks[j]);
+				if (score > 0)
+					console.log("Score", score, i, bookmarks[j]);
 				if (score > topScore)
 				{
 					topScore = score;
-					vaultIdx = i;
+					vaultMatches = [vault[i]];
 				}
-				if (score > 0)
-					console.log("Score", score, i, bookmarks[j]);
+				else if (score == topScore)
+					vaultMatches.push(vault[i]);
 			}
 		}
 	}
-	if (topScore > 0)
-		return vaultIdx;
+	return vaultMatches;
 }
 
 function getLocationMatchScore(tabLoc, bmLoc)
@@ -268,7 +277,7 @@ function getLocationMatchScore(tabLoc, bmLoc)
 		if (bmLoc.search && tabLoc.search && tabLoc.search.indexOf(bmLoc.search) > -1)
 			score += 1 + Math.atan(bmLoc.search.length);
 	}
-	return score;
+	return Math.round(100000 * score);
 }
 
 document.addEventListener("DOMContentLoaded", init);
