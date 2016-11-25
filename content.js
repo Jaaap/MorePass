@@ -58,6 +58,17 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 {
 	if (message.type === 'hasLoginForm')
 	{
+		let passwordInput = getPasswordInput();
+		if (passwordInput != null)
+		{
+			isUnknownCredentials = false;
+			passwordInput.value = message.pass;
+			let usernameInput = getUsernameInput(passwordInput);
+			if (usernameInput)
+				return sendResponse(true, usernameInput.value);
+			else
+				return sendResponse(true, null);
+		}
 		return sendResponse(getPasswordInput() != null);
 	}
 	else if (message.type === 'fillLoginForm')
