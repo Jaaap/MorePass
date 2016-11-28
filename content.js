@@ -8,9 +8,15 @@ function triggerEvent(elem, eventType)
 	return !elem.dispatchEvent(evt);
 }
 
-function getPasswordInput()
+function getPasswordInput(docRoot, tld)
 {
-	return document.querySelector('form[method="post" i] input[type="password"]');
+	let inputs = docRoot.querySelectorAll('form[method="post" i] input[type="password"]');
+	for (let i = 0; i < inputs.length; i++)
+	{
+		let url = new URL(inputs[i].form.action);
+		if (url && url.hostname && url.hostname.endsWith(tld))
+			return inputs[i];
+	}
 }
 function getUsernameInput(passwordInput)
 {
@@ -43,22 +49,13 @@ function getRemembermeCheckbox(passwordInput)
 	}
 }
 
-function onLoginformSubmit(evt)
-{
-	if (isUnknownCredentials)
-	{
-		let passwordInput = getPasswordInput();
-		let usernameInput = getUsernameInput(passwordInput) || {value:null};
-		chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value, docuhref: document.location.href }, function(response) { console.log(response); });
-	}
-}
 
 /* messaging */
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 {
 	if (message.type === 'hasLoginForm')
 	{
-		let passwordInput = getPasswordInput();
+		let passwordInput = getPasswordInput(document, message.tld);
 		if (passwordInput != null)
 		{
 			isUnknownCredentials = false;
@@ -71,7 +68,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 	}
 	else if (message.type === 'fillLoginForm')
 	{
-		let passwordInput = getPasswordInput();
+		let passwordInput = getPasswordInput(document, message.tld);
 		if (passwordInput != null)
 		{
 			isUnknownCredentials = false;
@@ -99,13 +96,23 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 });
 
 
+function onLoginformSubmit(evt)
+{
+	if (isUnknownCredentials)
+	{
+		let passwordInput = getPasswordInput(evt.target, "");
+		let usernameInput = getUsernameInput(passwordInput) || {value:null};
+		if (passwordInput && passwordInput.value && passwordInput.value.length)// && usernameInput && usernameInput.value && usernameInput.value.length)
+			chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value, docuhref: document.location.href }, function(response) { console.log(response); });
+	}
+}
 /* init */
-let passwordInput = getPasswordInput();
+let passwordInput = getPasswordInput(document, "");
 if (passwordInput)
 {
 	//FIXME more: don't do this for banks, ideal, DigID, Paypal etc
 	//FIXME: check form action too, might be a different domain.
-	if (!/\b(paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]+$/i.test(document.location.hostname))
+	if (!/\b(paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]$/i.test(document.location.hostname))
 		passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
 }
 
