@@ -13,28 +13,32 @@ function init()
 				let currentTab = tabs[0];
 
 				let tabLocation = new URL(currentTab.url);
-				document.querySelector('form#site>div>div>input').value = tlds.getBaseDomain(tabLocation.hostname);
 				let vaultMatches = getVaultMatches(vault, tabLocation);
 
 				if (vaultMatches.length > 0)
 				{
-					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm' }, function (data) {
-						if (typeof data !== 'undefined') {
+					let baseDomain = tlds.getBaseDomain(tabLocation.hostname);
+					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm', "tld": baseDomain }, function (data) {
+						if (typeof data !== 'undefined')
+						{
 							let hasLoginForm = data[0];
 							let pageUsernameValue = data[1];
 							console.log("hasLoginForm", hasLoginForm, pageUsernameValue);
 							if (hasLoginForm)
 							{
 								let i = 0;
-								for (let j = 0; j < vaultMatches.length; j++)
-									if (pageUsernameValue == vaultMatches[j][1])
-										i = j + 1;
-								if (i >= vaultMatches.length)
-									i = 0;
+								if (pageUsernameValue && pageUsernameValue.length)
+								{
+									for (let j = 0; j < vaultMatches.length; j++)
+										if (pageUsernameValue == vaultMatches[j][1])
+											i = j + 1;
+									if (i >= vaultMatches.length)
+										i = 0;
+								}
 								let row = vaultMatches[i];
 								if (vaultMatches.length > 1)
 									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
-								chrome.tabs.sendMessage(currentTab.id, {"type": 'fillLoginForm', "user": row[1], "pass": row[2], "submit": vaultMatches.length == 1}, function (response) { window.close(); });
+								chrome.tabs.sendMessage(currentTab.id, {"type": 'fillLoginForm', "tld": baseDomain, "user": row[1], "pass": row[2], "submit": vaultMatches.length == 1}, function (response) { window.close(); });
 							}
 						}
 					});
@@ -238,17 +242,21 @@ function getVaultMatches(vault, tabLocation)
 		if (vault[i][3] == SAVED)
 		{
 			let bookmarks = vault[i][0];
+			let localTopScore = 0;
 			for (let j = 0; j < bookmarks.length; j++)
 			{
 				let score = getLocationMatchScore(tabLocation, bookmarks[j]);
-				if (score > 0)
-					console.log("Score", score, i, bookmarks[j]);
-				if (score > topScore)
+				if (score > localTopScore)
+					localTopScore = score;
+			}
+			if (localTopScore > 0)
+			{
+				if (localTopScore > topScore)
 				{
-					topScore = score;
+					topScore = localTopScore;
 					vaultMatches = [vault[i]];
 				}
-				else if (score == topScore)
+				else if (localTopScore == topScore)
 					vaultMatches.push(vault[i]);
 			}
 		}
