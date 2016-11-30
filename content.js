@@ -2,10 +2,19 @@
 
 let isUnknownCredentials = true;
 
+function triggerMouseEvent(elem, eventType)
+{
+	return elem.dispatchEvent(new MouseEvent(eventType, { 'view': window, 'bubbles': true, 'cancelable': true }));
+}
+/*
+function triggerKeyboardEvent(elem, eventType, key)
+{
+	return elem.dispatchEvent(new KeyboardEvent(eventType, { 'bubbles': true, 'cancelable': true, 'key': key, 'char': key, 'shiftKey': false }));
+}
+*/
 function triggerEvent(elem, eventType)
 {
-	let evt = new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': true });
-	return !elem.dispatchEvent(evt);
+	return elem.dispatchEvent(new Event(eventType, { 'bubbles': true, 'cancelable': true }));
 }
 
 function getPasswordInput(docRoot, tld)
@@ -79,10 +88,12 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 		{
 			isUnknownCredentials = false;
 			passwordInput.value = message.pass;
+			triggerEvent(passwordInput, "input");
 			let usernameInput = getUsernameInput(passwordInput);
 			if (usernameInput)
 			{
 				usernameInput.value = message.user;
+				triggerEvent(usernameInput, "input");
 				let remembermeCheckbox = getRemembermeCheckbox(passwordInput);
 				if (remembermeCheckbox)
 					remembermeCheckbox.checked = true;
@@ -90,7 +101,9 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 				{
 					let submitButton = getSubmitButton(passwordInput);
 					if (submitButton)
-						triggerEvent(submitButton, "click");
+					{
+						triggerMouseEvent(submitButton, "click");
+					}
 				}
 			}
 			else
