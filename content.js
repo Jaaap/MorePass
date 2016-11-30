@@ -13,8 +13,14 @@ function getPasswordInput(docRoot, tld)
 	let inputs = docRoot.querySelectorAll('form[method="post" i] input[type="password"]');
 	for (let i = 0; i < inputs.length; i++)
 	{
-		let url = new URL(inputs[i].form.action);
-		if (url && url.hostname && url.hostname.endsWith(tld))
+		let action = inputs[i].form.action;
+		if (action && action.length)
+		{
+			let url = new URL(action);
+			if (url && url.hostname && url.hostname.endsWith(tld))
+				return inputs[i];
+		}
+		else
 			return inputs[i];
 	}
 }
