@@ -6,11 +6,12 @@
 		return window.crypto.getRandomValues(new Uint8Array(16));
 	}
 
-	function encrypt(keyStr, iv, data)
+	function encrypt(keyStr, data)
 	{
 		return importKey(keyStr).then(function(key){
 
 
+			let iv = createIv();
 			let encoder = new TextEncoder("utf-8");
 			let buf = encoder.encode(data);
 
@@ -18,7 +19,7 @@
 				{
 					name: "AES-CBC",
 					//Don't re-use initialization vectors!
-					//Always generate a new iv every time your encrypt!
+					//Always generate a new iv every time you encrypt!
 					iv: iv //window.crypto.getRandomValues(new Uint8Array(16)),
 				},
 				key, //from generateKey or importKey above
@@ -26,7 +27,9 @@
 			)
 			.then(function(encrypted){
 				//returns an ArrayBuffer containing the encrypted data
-				return encrypted;
+				//let decoder = new TextDecoder("utf-8");
+				//return [Uint8ArrayToBase64(iv), decoder.decode(new Uint8Array(encrypted))];
+				return Uint8ArrayToBase64(iv) + "\n\n" + Uint8ArrayToBase64(new Uint8Array(encrypted));
 			})
 			.catch(function(err){
 				console.error("crypto.subtle.encrypt", err);
@@ -84,6 +87,17 @@
 			});
 	}
 
-	//export { createIv, encrypt, decrypt };
-	window.crypto = { "createIv": createIv, "encrypt": encrypt, "decrypt": decrypt };
+	function Uint8ArrayToBase64(ui8a) {
+		return btoa(Array.prototype.map.call(ui8a, function(x) { return String.fromCharCode(x); }).join(''));
+	}
+	function base64ToUint8Array(b64) {
+		var binstr = atob(b64);
+		var buf = new Uint8Array(binstr.length);
+		Array.prototype.forEach.call(binstr, function (ch, i) {
+			buf[i] = ch.charCodeAt(0);
+		});
+		return buf;
+	}
+	//export { encrypt, decrypt };
+	window.crypto = { "encrypt": encrypt, "decrypt": decrypt };
 }
