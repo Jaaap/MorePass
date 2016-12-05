@@ -50,3 +50,31 @@ function getMatchingSubstringLength(a, b)
 	}
 	return 0;
 }
+function syncWithServer(email, passphrase, vault)
+{
+	encrypt(passphrase, JSON.stringify(vault)).then(function(result){
+		console.log("syncWithServer", result);
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4)
+			{
+				if (xhr.status == "200")
+				{
+					console.log(xhr.responseText);
+				}
+				else
+				{
+					console.warn("syncWithServer", "xhr", xhr);
+				}
+			}
+		};
+		xhr.ontimeout = function()
+		{
+			console.warn("syncWithServer", "timeout", xhr);
+		};
+		xhr.open("PUT", "https://pass.dog/s/index.pl", true);
+		//xhr.setRequestHeader("Content-type", options.contentType);
+		//xhr.setRequestHeader("Accept", "application/json");
+		xhr.send(result);
+	});
+}

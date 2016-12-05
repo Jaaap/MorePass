@@ -92,6 +92,7 @@
 			{
 				credentials = {"email": request.email, "passphrase": request.passphrase};
 				chrome.storage.local.set({"credentials": credentials});
+				syncWithServer(request.email, request.passphrase, vaultObj.get());
 			}
 			else if (request.action === "credentials.get")
 			{
@@ -108,6 +109,7 @@
 
 /* http auth */
 var target = "<all_urls>";
+
 
 //see https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onAuthRequired
 
