@@ -33,6 +33,7 @@
 			return this.save();
 		},
 		imprt: function(newVault) {
+			//FIXME: merge with existing vault
 			this.vault = newVault;
 			this.vault.sort(vaultSort);
 			return this.save();
@@ -92,7 +93,8 @@
 			{
 				credentials = {"email": request.email, "passphrase": request.passphrase};
 				chrome.storage.local.set({"credentials": credentials});
-				syncWithServer(request.email, request.passphrase, vaultObj.get());
+				//saveToServer(request.email, "pass hash FIXME", vaultObj.get());
+				getFromServer(request.email, "pass hash FIXME", saveVaultFromServer);
 			}
 			else if (request.action === "credentials.get")
 			{
@@ -105,21 +107,27 @@
 		}
 	});
 
+	function saveVaultFromServer(encryptedVault)
+	{
+		decrypt(credentials.passphrase, encryptedVault).then(function(newVault){
+			//console.log("saveVaultFromServer", newVault);
+			vaultObj.imprt(JSON.parse(newVault));
+		});
+	}
+
+	/* http auth */
+	var target = "<all_urls>";
 
 
-/* http auth */
-var target = "<all_urls>";
-
-
-//see https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onAuthRequired
+	//see https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onAuthRequired
 
 
 
-/*
+	/*
 	chrome.browserAction.onClicked.addListener(function(){ console.log("browserAction.onClicked"); });
 	if ("onInstalled" in chrome.runtime) chrome.runtime.onInstalled.addListener(function(){ console.log("runtime.onInstalled"); });
 	if ("onStartup" in chrome.runtime) chrome.runtime.onStartup.addListener(function(){ console.log("runtime.onStartup"); });
 	chrome.tabs.onUpdated.addListener(function(){ console.log("tabs.onUpdated"); });
-*/
+	*/
 
 }
