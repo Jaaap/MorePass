@@ -40,9 +40,12 @@
 		});
 	}
 
-	function decrypt(keyStr, iv, data)
+	function decrypt(keyStr, ivAndData)
 	{
-		//let iv = new Uint8Array(data.slice(0, 16));
+		//data is base64 iv + "\n\n" + base64 encrypted vault
+		let [b64Iv, b64Data] = ivAndData.split("\n\n");
+		let iv = Base64ToUint8Array(b64Iv);
+		let data = Base64ToUint8Array(b64Data);
 		return importKey(keyStr).then(function(key){
 			return window.crypto.subtle.decrypt(
 				{
@@ -50,7 +53,7 @@
 					iv: iv, //The initialization vector you used to encrypt
 				},
 				key, //from generateKey or importKey above
-				new Uint8Array(data) //ArrayBuffer of the data
+				data //new Uint8Array(data) //ArrayBuffer of the data
 			)
 			.then(function(decrypted){ //returns an ArrayBuffer containing the decrypted data
 				let decoder = new TextDecoder("utf-8");
@@ -90,7 +93,7 @@
 	function Uint8ArrayToBase64(ui8a) {
 		return btoa(Array.prototype.map.call(ui8a, function(x) { return String.fromCharCode(x); }).join(''));
 	}
-	function base64ToUint8Array(b64) {
+	function Base64ToUint8Array(b64) {
 		var binstr = atob(b64);
 		var buf = new Uint8Array(binstr.length);
 		Array.prototype.forEach.call(binstr, function (ch, i) {

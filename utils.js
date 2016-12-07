@@ -50,8 +50,33 @@ function getMatchingSubstringLength(a, b)
 	}
 	return 0;
 }
-function syncWithServer(email, passphrase, vault)
+function getFromServer(email, passphrase, callback)
 {
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4)
+		{
+			if (xhr.status == "200")
+			{
+				console.log(xhr.responseText);
+				callback(xhr.responseText);
+			}
+			else
+			{
+				console.warn("syncWithServer", "xhr", xhr);
+			}
+		}
+	};
+	xhr.ontimeout = function()
+	{
+		console.warn("syncWithServer", "timeout", xhr);
+	};
+	xhr.open("GET", "https://pass.dog/s/index.pl", true);
+	xhr.send();
+}
+function saveToServer(email, passphrase, vault)
+{
+	//FIXME: move the encrypt stuff to background.js
 	encrypt(passphrase, JSON.stringify(vault)).then(function(result){
 		console.log("syncWithServer", result);
 		var xhr = new XMLHttpRequest();
