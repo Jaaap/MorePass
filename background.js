@@ -93,7 +93,7 @@
 			{
 				credentials = {"email": request.email, "passphrase": request.passphrase};
 				chrome.storage.local.set({"credentials": credentials});
-				//saveToServer(request.email, "pass hash FIXME", vaultObj.get());
+				//uploadVaultToServer(request.email, "pass hash FIXME", vaultObj.get());
 				getFromServer(request.email, "pass hash FIXME", saveVaultFromServer);
 			}
 			else if (request.action === "credentials.get")
@@ -112,6 +112,14 @@
 		decrypt(credentials.passphrase, encryptedVault).then(function(newVault){
 			//console.log("saveVaultFromServer", newVault);
 			vaultObj.imprt(JSON.parse(newVault));
+		});
+	}
+	function uploadVaultToServer(email, passphrase, vault)
+	{
+		encrypt(passphrase, JSON.stringify(vault)).then(function(encryptedVault){
+			sign(passphrase, encryptedVault).then(function(signature){
+				saveToServer(signature + "\n\n" + encryptedVault);
+			});
 		});
 	}
 

@@ -50,6 +50,7 @@ function getMatchingSubstringLength(a, b)
 	}
 	return 0;
 }
+
 function getFromServer(email, passphrase, callback)
 {
 	var xhr = new XMLHttpRequest();
@@ -63,43 +64,40 @@ function getFromServer(email, passphrase, callback)
 			}
 			else
 			{
-				console.warn("syncWithServer", "xhr", xhr);
+				console.warn("getFromServer", "xhr", xhr);
 			}
 		}
 	};
 	xhr.ontimeout = function()
 	{
-		console.warn("syncWithServer", "timeout", xhr);
+		console.warn("getFromServer", "timeout", xhr);
 	};
 	xhr.open("GET", "https://pass.dog/s/index.pl", true);
 	xhr.send();
 }
-function saveToServer(email, passphrase, vault)
-{
-	//FIXME: move the encrypt stuff to background.js
-	encrypt(passphrase, JSON.stringify(vault)).then(function(result){
-		console.log("syncWithServer", result);
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4)
-			{
-				if (xhr.status == "200")
-				{
-					console.log(xhr.responseText);
-				}
-				else
-				{
-					console.warn("syncWithServer", "xhr", xhr);
-				}
-			}
-		};
-		xhr.ontimeout = function()
+
+function saveToServer(encryptedVault){
+	console.log("syncWithServer", encryptedVault);
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if (xhr.readyState == 4)
 		{
-			console.warn("syncWithServer", "timeout", xhr);
-		};
-		xhr.open("PUT", "https://pass.dog/s/index.pl", true);
-		//xhr.setRequestHeader("Content-type", options.contentType);
-		//xhr.setRequestHeader("Accept", "application/json");
-		xhr.send(result);
-	});
+			if (xhr.status == "200")
+			{
+				console.log(xhr.responseText);
+			}
+			else
+			{
+				console.warn("saveToServer", "xhr", xhr);
+			}
+		}
+	};
+	xhr.ontimeout = function()
+	{
+		console.warn("saveToServer", "timeout", xhr);
+	};
+	xhr.open("PUT", "https://pass.dog/s/index.pl", true);
+	//xhr.setRequestHeader("Content-type", options.contentType);
+	//xhr.setRequestHeader("Accept", "application/json");
+	xhr.send(encryptedVault);
 }
