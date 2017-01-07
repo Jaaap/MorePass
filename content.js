@@ -19,19 +19,21 @@ function triggerEvent(elem, eventType)
 
 function getPasswordInput(docRoot, tld)
 {
-	let inputs = docRoot.querySelectorAll('form[method="post" i] input[type="password"]');
+	let inputs = docRoot.querySelectorAll('form[method="post" i] input[type="password"],form input[type="password"]');
+	//level 1: form's action must match tld
 	for (let i = 0; i < inputs.length; i++)
 	{
 		let action = inputs[i].form.action;
 		if (action && action.length)
 		{
 			let url = new URL(action);
-			if (url && url.hostname && url.hostname.endsWith(tld))
+			if (url && url.hostname && (url.hostname == tld || url.hostname.endsWith("." + tld)))
 				return inputs[i];
 		}
-		else
-			return inputs[i];
 	}
+	//level 2: forget the tld and the action and just return the first input from inputs
+	if (inputs.length)
+		return inputs[0];
 }
 function getUsernameInput(passwordInput)
 {
