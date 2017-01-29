@@ -4,17 +4,17 @@ let isUnknownCredentials = true;
 
 function triggerMouseEvent(elem, eventType)
 {
-	return elem.dispatchEvent(new MouseEvent(eventType, { 'view': window, 'bubbles': true, 'cancelable': true }));
+	return elem.dispatchEvent(new MouseEvent(eventType, {'view': window, 'bubbles': true, 'cancelable': true}));
 }
 /*
 function triggerKeyboardEvent(elem, eventType, key)
 {
-	return elem.dispatchEvent(new KeyboardEvent(eventType, { 'bubbles': true, 'cancelable': true, 'key': key, 'char': key, 'shiftKey': false }));
+	return elem.dispatchEvent(new KeyboardEvent(eventType, {'bubbles': true, 'cancelable': true, 'key': key, 'char': key, 'shiftKey': false}));
 }
 */
 function triggerEvent(elem, eventType)
 {
-	return elem.dispatchEvent(new Event(eventType, { 'bubbles': true, 'cancelable': true }));
+	return elem.dispatchEvent(new Event(eventType, {'bubbles': true, 'cancelable': true}));
 }
 
 function getPasswordInput(docRoot, tld)
@@ -124,7 +124,7 @@ function onLoginformSubmit(evt)
 		let passwordInput = getPasswordInput(evt.target, "");
 		let usernameInput = getUsernameInput(passwordInput) || {value:null};
 		if (passwordInput && passwordInput.value && passwordInput.value.length)// && usernameInput && usernameInput.value && usernameInput.value.length)
-			chrome.runtime.sendMessage({action: "submit", username: usernameInput.value, password: passwordInput.value, docuhref: document.location.href }, function(response) { console.log(response); });
+			chrome.runtime.sendMessage({'action': "submit", 'username': usernameInput.value, 'password': passwordInput.value, 'docuhref': document.location.href }, function(response) { console.log(response); });
 	}
 }
 /* init */

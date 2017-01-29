@@ -6,10 +6,10 @@ function init()
 {
 	if ("chrome" in window)
 	{
-		chrome.runtime.sendMessage({action: "vault.get"}, function(vault) {
+		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
 			fillSitesetSelect(vault);
 
-			chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
+			chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
 				let currentTab = tabs[0];
 
 				let tabLocation = new URL(currentTab.url);
@@ -18,7 +18,7 @@ function init()
 				if (vaultMatches.length > 0)
 				{
 					let baseDomain = tlds.getBaseDomain(tabLocation.hostname);
-					chrome.tabs.sendMessage(currentTab.id, { type: 'hasLoginForm', "tld": baseDomain }, function (data) {
+					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'tld': baseDomain}, function (data) {
 						if (typeof data !== 'undefined')
 						{
 							let hasLoginForm = data[0];
@@ -38,14 +38,14 @@ function init()
 								let row = vaultMatches[i];
 								if (vaultMatches.length > 1)
 									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
-								chrome.tabs.sendMessage(currentTab.id, {"type": 'fillLoginForm', "tld": baseDomain, "user": row[1], "pass": row[2], "submit": vaultMatches.length == 1}, function (response) { window.close(); });
+								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': baseDomain, 'user': row[1], 'pass': row[2], 'submit': vaultMatches.length == 1}, function (response) { window.close(); });
 							}
 						}
 					});
 				}
 			});
 		});
-		chrome.runtime.sendMessage({action: "credentials.get"}, function(email) {
+		chrome.runtime.sendMessage({'action': 'credentials.get'}, function(email) {
 			document.querySelector('form#decrypt input#email').value = email;
 		});
 	}
@@ -77,7 +77,7 @@ function onSitesetSelectChange(evt)
 	let urlDivs = document.querySelectorAll('div>div.url');
 	if (select.value && select.value >= 0)
 	{
-		chrome.runtime.sendMessage({action: "vault.get"}, function(vault) {
+		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
 			let siteset = vault[select.value];
 			nrOfSites = siteset[0].length;
 			document.querySelector('input[name="username"]').value = siteset[1];
@@ -128,14 +128,14 @@ function onSitesetSaveClick(evt)
 	}
 	let selectValue = document.querySelector('form#site>label>select').value;
 	if (selectValue >= 0)
-		chrome.runtime.sendMessage({action: "vault.edit", siteset: entry, idx: selectValue}, function(vault) { fillSitesetSelect(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': selectValue}, function(vault) { fillSitesetSelect(vault); });
 	else
-		chrome.runtime.sendMessage({action: "vault.add", siteset: entry}, function(vault) { fillSitesetSelect(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.add', 'siteset': entry}, function(vault) { fillSitesetSelect(vault); });
 }
 function onSitesetDeleteClick(evt)
 {
 	let selectValue = document.querySelector('form#site>label>select').value;
-	chrome.runtime.sendMessage({action: "vault.del", idx: selectValue}, function(vault) { fillSitesetSelect(vault); });
+	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': selectValue}, function(vault) { fillSitesetSelect(vault); });
 }
 
 function onImportSaveClick(evt)
@@ -165,7 +165,7 @@ function onImportSaveClick(evt)
 			}
 			if (!baseDomainSeen)
 			{
-				preVault[i][1][0] = {"hostname": preVault[i][0]};
+				preVault[i][1][0] = {'hostname': preVault[i][0]};
 			}
 		}
 		//step 2: merge entries with same credentials
@@ -188,7 +188,7 @@ function onImportSaveClick(evt)
 		{
 			vault.push([preVault[i][1], preVault[i][2], preVault[i][3], 1]);
 		}
-		chrome.runtime.sendMessage({"action": "vault.imprt", "vault": vault}, function(vault) { fillSitesetSelect(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.imprt', 'vault': vault}, function(vault) { fillSitesetSelect(vault); });
 		ta.value = "";//JSON.stringify(preVault);
 		alert("Import successful");
 	}
