@@ -94,7 +94,7 @@
 				credentials = {"email": request.email, "passphrase": request.passphrase};
 				chrome.storage.local.set({"credentials": credentials});
 				//uploadVaultToServer(request.email, "pass hash FIXME", vaultObj.get());
-				getFromServer(request.email, "pass hash FIXME", saveVaultFromServer);
+				getFromServer(request.email, "pass hash FIXME");
 			}
 			else if (request.action === "credentials.get")
 			{
@@ -107,6 +107,7 @@
 		}
 	});
 
+
 	function saveVaultFromServer(encryptedVault)
 	{
 		decrypt(credentials.passphrase, encryptedVault).then(function(newVault){
@@ -114,6 +115,32 @@
 			vaultObj.imprt(JSON.parse(newVault));
 		});
 	}
+	function getFromServer(email, passphrase)
+	{
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4)
+			{
+				if (xhr.status == "200")
+				{
+					console.log(xhr.responseText);
+					saveVaultFromServer(xhr.responseText);
+				}
+				else
+				{
+					console.warn("getFromServer", "xhr", xhr);
+				}
+			}
+		};
+		xhr.ontimeout = function()
+		{
+			console.warn("getFromServer", "timeout", xhr);
+		};
+		xhr.open("GET", "https://pass.dog/s/index.pl", true);
+		xhr.send();
+	}
+
+
 	function uploadVaultToServer(email, passphrase, vault)
 	{
 		encrypt(passphrase, JSON.stringify(vault)).then(function(encryptedVault){
@@ -121,6 +148,31 @@
 				saveToServer(signature + "\n\n" + encryptedVault);
 			});
 		});
+	}
+	function saveToServer(encryptedVault){
+		console.log("syncWithServer", encryptedVault);
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4)
+			{
+				if (xhr.status == "200")
+				{
+					console.log(xhr.responseText);
+				}
+				else
+				{
+					console.warn("saveToServer", "xhr", xhr);
+				}
+			}
+		};
+		xhr.ontimeout = function()
+		{
+			console.warn("saveToServer", "timeout", xhr);
+		};
+		xhr.open("PUT", "https://pass.dog/s/index.pl", true);
+		//xhr.setRequestHeader("Content-type", options.contentType);
+		//xhr.setRequestHeader("Accept", "application/json");
+		xhr.send(encryptedVault);
 	}
 
 	/* http auth */
