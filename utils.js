@@ -50,7 +50,7 @@ function getMatchingSubstringLength(a, b)
 	}
 	return 0;
 }
-
+/*
 function getFromServer(email, passphrase, callback)
 {
 	var xhr = new XMLHttpRequest();
@@ -101,3 +101,4 @@ function saveToServer(encryptedVault){
 	//xhr.setRequestHeader("Accept", "application/json");
 	xhr.send(encryptedVault);
 }
+*/
