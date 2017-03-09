@@ -1,3 +1,6 @@
+'use strict';
+const UNSAVED = 0, SAVED = 1;
+const SITES = 0, USERNAME = 1, PASSWORD = 2, SAVEDSTATE = 3, LASTMODIFIED = 4;
 function getUrlFromHref(href)
 {
 	let url = new URL(href);
@@ -24,21 +27,21 @@ function parseCSV(strData, strDelimiter)
 			arrData.push([]);
 		let strMatchedValue;
 		if (arrMatches[2])
-			strMatchedValue = arrMatches[ 2 ].replace(new RegExp( "\"\"", "g" ), "\"");
+			strMatchedValue = arrMatches[2].replace(new RegExp( "\"\"", "g" ), "\"");
 		else
-			strMatchedValue = arrMatches[ 3 ];
+			strMatchedValue = arrMatches[3];
 		arrData[arrData.length - 1].push(strMatchedValue);
 	}
 	return arrData;
 }
 function vaultSort(aa,bb)
 {
-	let a = aa[0][0].hostname;
-	let b = bb[0][0].hostname;
-	if (aa[3] == bb[3])
+	let a = aa[SITES][0].hostname + "/" + aa[SITES][0].pathname;
+	let b = bb[SITES][0].hostname + "/" + bb[SITES][0].pathname;
+	if (aa[SAVEDSTATE] == bb[SAVEDSTATE])//unsaved vs saved
 		return (a < b ? -1 : +(a > b));
 	else
-		return aa[3] < bb[3] ? -1 : 1;
+		return aa[SAVEDSTATE] < bb[SAVEDSTATE] ? -1 : 1;
 }
 function getMatchingSubstringLength(a, b)
 {
@@ -50,55 +53,3 @@ function getMatchingSubstringLength(a, b)
 	}
 	return 0;
 }
-/*
-function getFromServer(email, passphrase, callback)
-{
-	var xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4)
-		{
-			if (xhr.status == "200")
-			{
-				console.log(xhr.responseText);
-				callback(xhr.responseText);
-			}
-			else
-			{
-				console.warn("getFromServer", "xhr", xhr);
-			}
-		}
-	};
-	xhr.ontimeout = function()
-	{
-		console.warn("getFromServer", "timeout", xhr);
-	};
-	xhr.open("GET", "https://pass.dog/s/index.pl", true);
-	xhr.send();
-}
-
-function saveToServer(encryptedVault){
-	console.log("syncWithServer", encryptedVault);
-	var xhr = new XMLHttpRequest();
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4)
-		{
-			if (xhr.status == "200")
-			{
-				console.log(xhr.responseText);
-			}
-			else
-			{
-				console.warn("saveToServer", "xhr", xhr);
-			}
-		}
-	};
-	xhr.ontimeout = function()
-	{
-		console.warn("saveToServer", "timeout", xhr);
-	};
-	xhr.open("PUT", "https://pass.dog/s/index.pl", true);
-	//xhr.setRequestHeader("Content-type", options.contentType);
-	//xhr.setRequestHeader("Accept", "application/json");
-	xhr.send(encryptedVault);
-}
-*/

@@ -1,7 +1,6 @@
 //import * as crypto from "crypto";
 {
 	'use strict';
-	const UNSAVED = 0, SAVED = 1;
 	let credentials = {};
 
 	function Vault()
@@ -18,12 +17,14 @@
 			return this.vault;
 		},
 		add: function(siteset) {
+			siteset[LASTMODIFIED] = (new Date()).getTime();
 			this.vault.push(siteset);
 			this.vault.sort(vaultSort);
 			return this.save();
 		},
 		edit: function(idx, siteset) {
-			siteset[3] = SAVED;
+			siteset[SAVEDSTATE] = SAVED;
+			siteset[LASTMODIFIED] = (new Date()).getTime();
 			this.vault[idx] = siteset;
 			this.vault.sort(vaultSort);
 			return this.save();
@@ -72,7 +73,7 @@
 			{
 				let ss = request.siteset;
 				if (ss.length <= 3)
-					ss[3] = SAVED;
+					ss[SAVEDSTATE] = SAVED;
 				sendResponse(vaultObj.add(ss));
 			}
 			else if (request.action === "vault.imprt")

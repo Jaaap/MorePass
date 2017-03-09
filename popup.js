@@ -30,7 +30,7 @@ function init()
 								if (pageUsernameValue && pageUsernameValue.length)
 								{
 									for (let j = 0; j < vaultMatches.length; j++)
-										if (pageUsernameValue == vaultMatches[j][1])
+										if (pageUsernameValue == vaultMatches[j][USERNAME])
 											i = j + 1;
 									if (i >= vaultMatches.length)
 										i = 0;
@@ -38,7 +38,7 @@ function init()
 								let row = vaultMatches[i];
 								if (vaultMatches.length > 1)
 									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
-								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': baseDomain, 'user': row[1], 'pass': row[2], 'submit': vaultMatches.length == 1}, function (response) { window.close(); });
+								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': baseDomain, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, function (response) { window.close(); });
 							}
 						}
 					});
@@ -79,15 +79,15 @@ function onSitesetSelectChange(evt)
 	{
 		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
 			let siteset = vault[select.value];
-			nrOfSites = siteset[0].length;
-			document.querySelector('input[name="username"]').value = siteset[1];
-			document.querySelector('input[name="password"]').value = siteset[2];
+			nrOfSites = siteset[SITES].length;
+			document.querySelector('input[name="username"]').value = siteset[USERNAME];
+			document.querySelector('input[name="password"]').value = siteset[PASSWORD];
 			for (let j = 0; j < nrOfSites; j++)
 			{
 				urlDivs[j].classList.add("on");
 				let inputs = urlDivs[j].querySelectorAll('input');
-				inputs[0].value = siteset[0][j].hostname;
-				inputs[1].value = siteset[0][j].pathname || "";
+				inputs[0].value = siteset[SITES][j].hostname;
+				inputs[1].value = siteset[SITES][j].pathname || "";
 			}
 		});
 	}
@@ -115,15 +115,15 @@ function onSitesetSaveClick(evt)
 {
 	//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
 	let entry = [[]];
-	entry[1] = document.querySelector('input[name="username"]').value;
-	entry[2] = document.querySelector('input[name="password"]').value;
+	entry[USERNAME] = document.querySelector('input[name="username"]').value;
+	entry[PASSWORD] = document.querySelector('input[name="password"]').value;
 	let urlDivs = document.querySelectorAll('div>div.url');
 	for (let i = 0; i < urlDivs.length; i++)
 	{
 		let host = urlDivs[i].querySelector('input[name="host"]').value;
 		if (urlDivs[i].classList.contains("on") && host != "")
 		{
-			entry[0].push(getUrlFromHref('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value));
+			entry[SITES].push(getUrlFromHref('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value));
 		}
 	}
 	let selectValue = document.querySelector('form#site>label>select').value;
@@ -217,9 +217,9 @@ function fillSitesetSelect(dta)
 	{
 		let opt = document.createElement("option");
 		opt.value = i;
-		opt.appendChild(document.createTextNode(dta[i][0].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
+		opt.appendChild(document.createTextNode(dta[i][SITES].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
 		if (dta[i].length > 3)
-			frags[dta[i][3]].appendChild(opt);
+			frags[dta[i][SAVEDSTATE]].appendChild(opt);
 	}
 	let optGroup0 = document.querySelector('optgroup#ssNew');
 	while (optGroup0.hasChildNodes())
@@ -239,9 +239,9 @@ function getVaultMatches(vault, tabLocation)
 	let vaultMatches = [];
 	for (let i = 0; i < vault.length; i++)
 	{
-		if (vault[i][3] == SAVED)
+		if (vault[i][SAVEDSTATE] == SAVED)
 		{
-			let bookmarks = vault[i][0];
+			let bookmarks = vault[i][SITES];
 			let localTopScore = 0;
 			for (let j = 0; j < bookmarks.length; j++)
 			{
