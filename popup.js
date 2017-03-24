@@ -45,30 +45,38 @@ function init()
 				}
 			});
 		});
+/*
 		chrome.runtime.sendMessage({'action': 'credentials.get'}, function(email) {
 			document.querySelector('form#exprt input#email').value = email;
 		});
+*/
 	}
 	else
 	{
 		console.error("window.chrome not found");
 	}
 
-	document.querySelector('form#exprt button').addEventListener("click", onExportButtonClick, false);
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
 	document.querySelector('form#site>i>button.save').addEventListener("click", onSitesetSaveClick, false);
 	document.querySelector('form#site>i>button.del').addEventListener("click", onSitesetDeleteClick, false);
-	document.querySelector('form#imprt>button').addEventListener("click", onImportSaveClick, false);
+	document.querySelector('button#importLastpass').addEventListener("click", onImportSaveClick, false);
+	document.querySelector('button#export').addEventListener("click", onExportButtonClick, false);
+	document.querySelector('button#import').addEventListener("click", onImportButtonClick, false);
 }
 
 function onExportButtonClick(evt)
 {
-	//let email = document.querySelector('form#exprt input#email').value;
-	let passp = document.querySelector('form#exprt input#passphrase').value;
-	//chrome.runtime.sendMessage({"action": "credentials.set", "email": email}, function(result) { console.log(result); });
-	chrome.runtime.sendMessage({'action': 'credentials.encrypt', "passphrase": passp}, function(encryptedVault) {
-		document.querySelector('form#imprt textarea').value = encryptedVault;
+	let passp = document.querySelector('input#passphrase').value;
+	chrome.runtime.sendMessage({'action': 'vault.encrypt', "passphrase": passp}, function(encryptedVault) {
+		document.querySelector('form#imex textarea').value = encryptedVault;
+	});
+}
+function onImportButtonClick(evt)
+{
+	let passp = document.querySelector('input#passphrase').value;
+	chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp, "vault": document.querySelector('form#imex textarea').value}, function(result) {
+		document.querySelector('form#imex textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
 	});
 }
 
@@ -143,7 +151,7 @@ function onSitesetDeleteClick(evt)
 
 function onImportSaveClick(evt)
 {
-	let ta = document.querySelector('#imprt textarea');
+	let ta = document.querySelector('#imex textarea');
 	if (ta && ta.value && ta.value.indexOf('url,username,password,') == 0) // LastPass style
 	{
 		let uup = parseCSV(ta.value);

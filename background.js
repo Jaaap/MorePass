@@ -34,9 +34,7 @@
 			return this.save();
 		},
 		imprt: function(newVault) {
-			//FIXME: merge with existing vault
 			this.vault = newVault;
-			this.vault.sort(vaultSort);
 			return this.save();
 		},
 		save: function() {
@@ -78,6 +76,7 @@
 			}
 			else if (request.action === "vault.imprt")
 			{
+				request.vault.sort(vaultSort);
 				sendResponse(vaultObj.imprt(request.vault));
 			}
 			else if (request.action === "vault.edit")
@@ -90,13 +89,29 @@
 				sendResponse(vaultObj.del(request.idx));
 				chrome.browserAction.setBadgeText({text: ""});
 			}
-			else if (request.action === "credentials.encrypt")
+			else if (request.action === "vault.encrypt")
 			{
 				encrypt(request.passphrase, JSON.stringify(vaultObj.get())).then(encryptedVault => {
 					sendResponse(encryptedVault);
 				});
 				return true;
 			}
+			else if (request.action === "vault.decrypt.merge")
+			{
+				decrypt(request.passphrase, request.vault).then(decryptedVault => {
+					//FIXME: catch decrypt errors and handle them accordingly
+					try {
+						let decryptedVaultObj = JSON.parse(decryptedVault);
+						//FIXME: enable this line
+						//vaultObj.imprt(mergeVaults(vaultObj.get(), decryptedVaultObj));
+						sendResponse({"success":true});
+					} catch(e) {
+						sendResponse({"success":false,"error":"Invalid JSON"});
+					}
+				});
+				return true;
+			}
+/*
 			else if (request.action === "credentials.set")
 			{
 				credentials = {"email": request.email};
@@ -108,6 +123,7 @@
 			{
 				sendResponse(credentials.email);
 			}
+*/
 			else
 			{
 				console.warn("Unknown action", request.action);
@@ -116,6 +132,7 @@
 	});
 
 
+/*
 	function saveVaultFromServer(encryptedVault)
 	{
 		decrypt(credentials.passphrase, encryptedVault).then(function(newVault){
@@ -123,7 +140,6 @@
 			vaultObj.imprt(JSON.parse(newVault));
 		});
 	}
-/*
 	function getFromServer(email, passphrase)
 	{
 		var xhr = new XMLHttpRequest();
