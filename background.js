@@ -90,12 +90,19 @@
 				sendResponse(vaultObj.del(request.idx));
 				chrome.browserAction.setBadgeText({text: ""});
 			}
+			else if (request.action === "credentials.encrypt")
+			{
+				encrypt(request.passphrase, JSON.stringify(vaultObj.get())).then(encryptedVault => {
+					sendResponse(encryptedVault);
+				});
+				return true;
+			}
 			else if (request.action === "credentials.set")
 			{
-				credentials = {"email": request.email, "passphrase": request.passphrase};
+				credentials = {"email": request.email};
 				chrome.storage.local.set({"credentials": credentials});
 				//uploadVaultToServer(request.email, "pass hash FIXME", vaultObj.get());
-				getFromServer(request.email, "pass hash FIXME");
+				//getFromServer(request.email, "pass hash FIXME");
 			}
 			else if (request.action === "credentials.get")
 			{
@@ -116,6 +123,7 @@
 			vaultObj.imprt(JSON.parse(newVault));
 		});
 	}
+/*
 	function getFromServer(email, passphrase)
 	{
 		var xhr = new XMLHttpRequest();
@@ -141,7 +149,6 @@
 		xhr.send();
 	}
 
-
 	function uploadVaultToServer(email, passphrase, vault)
 	{
 		encrypt(passphrase, JSON.stringify(vault)).then(function(encryptedVault){
@@ -150,6 +157,7 @@
 			});
 		});
 	}
+*/
 	function saveToServer(encryptedVault){
 		console.log("syncWithServer", encryptedVault);
 		var xhr = new XMLHttpRequest();

@@ -46,7 +46,7 @@ function init()
 			});
 		});
 		chrome.runtime.sendMessage({'action': 'credentials.get'}, function(email) {
-			document.querySelector('form#decrypt input#email').value = email;
+			document.querySelector('form#exprt input#email').value = email;
 		});
 	}
 	else
@@ -54,7 +54,7 @@ function init()
 		console.error("window.chrome not found");
 	}
 
-	document.querySelector('form#decrypt button').addEventListener("click", onDecryptButtonClick, false);
+	document.querySelector('form#exprt button').addEventListener("click", onExportButtonClick, false);
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
 	document.querySelector('form#site>i>button.save').addEventListener("click", onSitesetSaveClick, false);
@@ -62,11 +62,14 @@ function init()
 	document.querySelector('form#imprt>button').addEventListener("click", onImportSaveClick, false);
 }
 
-function onDecryptButtonClick(evt)
+function onExportButtonClick(evt)
 {
-	let email = document.querySelector('form#decrypt input#email').value;
-	let passp = document.querySelector('form#decrypt input#passphrase').value;
-	chrome.runtime.sendMessage({"action": "credentials.set", "email": email, "passphrase": passp}, function(result) { console.log(result); });
+	//let email = document.querySelector('form#exprt input#email').value;
+	let passp = document.querySelector('form#exprt input#passphrase').value;
+	//chrome.runtime.sendMessage({"action": "credentials.set", "email": email}, function(result) { console.log(result); });
+	chrome.runtime.sendMessage({'action': 'credentials.encrypt', "passphrase": passp}, function(encryptedVault) {
+		document.querySelector('form#imprt textarea').value = encryptedVault;
+	});
 }
 
 function onSitesetSelectChange(evt)
