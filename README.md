@@ -2,13 +2,13 @@
 WebExtension for Chrome, Firefox and Edge to manage passwords on multiple devices. You do not have to install other programs (like KeePass requires) and there are no binaries (like .exe files) in the extension.
 
 ## What?
-pass.dog allows you to manage your passwords, encrypt them locally and store that encrypted vault on a server (it's not a cloud, just a server).
+pass.dog allows you to manage your passwords, encrypt & export them so you can put it on a USB stick or mail it to yourself and decrypt & import them on another device.
 
 ## Secure?
-See for yourself. Read the sourcecode (it's just javascript) and report any bugs you find. pass.dog uses the native crypto.subtle.encrypt function in the browser to encrypt and decrypt with AES-CBC.
+See for yourself. Read the sourcecode (it's just javascript) and report any bugs you find. pass.dog uses the native crypto.subtle.encrypt function in the browser to encrypt and decrypt with AES-GCM.
 
 ## Why?
-Because LastPass is starting to fustrate me. Do you know they can now recover your stuff when you lost your master passphrase? Also the interface just bugs me.
+Because LastPass is starting to annoy me. Do you know they can now recover your stuff when you lost your master passphrase? Also the interface just bugs me.
 
 ## How to use?
 While in development, you can clone or download this WebExtension, then ...
