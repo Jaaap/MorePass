@@ -44,7 +44,7 @@ function vaultSort(aa,bb)
 	else
 		return aa[SAVEDSTATE] < bb[SAVEDSTATE] ? -1 : 1;
 }
-function vaultSubSort(a,b)
+function sitesSort(a,b)
 {
 	for (let prop of SITEPROPS)
 		if (a[prop] !== b[prop])
@@ -61,28 +61,42 @@ function getMatchingSubstringLength(a, b)
 	}
 	return 0;
 }
-function hashEquals(h1, h2)//hashes with hostname etc
+function siteEquals(h1, h2)//SITE: hash with hostname etc
 {
 	for (let prop of SITEPROPS)
 		if (h1[prop] !== h2[prop])
 			return false;
 	return true;
 }
-function arrEquals(a1, a2)//arrays of hashes with hostname etc, assumes everything is sorted
+function sitesEquals(a1, a2)//SITES: array of hashes with hostname etc, assumes everything is sorted
 {
 	if (a1.length !== a2.length)
 		return false;
 	for (let i = 0; i < a1.length; i++)
-		if (!hashEquals(a1[i], a2[i]))
+		if (!siteEquals(a1[i], a2[i]))
 			return false;
 	return true;
 }
 function contains(arr, val)//assumes everything is sorted
 {
 	for (let entry of arr)
-		if (entry[1] == val[1] && entry[2] == val[2] && entry[3] === val[3] && arrEquals(entry[0], val[0]))
+		if (entry[USERNAME] == val[USERNAME] && entry[PASSWORD] == val[PASSWORD] && sitesEquals(entry[SITES], val[SITES]))
 			return true;
 	return false;
+}
+function mergeSites(a1, a2)//into a1
+{
+	for (let h2 of a2)
+	{
+		let match = false;
+		for (let h1 of a1)
+			if (siteEquals(h1, h2))
+				match = true;
+		if (!match)
+			a1.push(h2);
+	}
+	a1.sort(sitesSort);
+console.log("mergeSites", JSON.stringify(a1));
 }
 function mergeVaults(vault1,vault2)
 {
@@ -91,9 +105,9 @@ function mergeVaults(vault1,vault2)
 	v1.sort(vaultSort);
 	v2.sort(vaultSort);
 	for (let entry of v1)
-		entry[SITES].sort(vaultSubSort);
+		entry[SITES].sort(sitesSort);
 	for (let entry of v2)
-		entry[SITES].sort(vaultSubSort);
+		entry[SITES].sort(sitesSort);
 
 	//step 1: add different lines of v2 to v1
 	for (let entry of v2)
@@ -101,7 +115,7 @@ function mergeVaults(vault1,vault2)
 		//If this exact line is not in v1 somewhere, append it to v1
 		if (!contains(v1, entry))
 		{
-			//console.log("adding", entry);
+			console.log("adding", entry);
 			v1.push(entry);
 		}
 	}
@@ -113,9 +127,10 @@ function mergeVaults(vault1,vault2)
 			if (i != j && v1[i][USERNAME] == v1[j][USERNAME] && v1[i][PASSWORD] == v1[j][PASSWORD])
 			{
 				//merge i and j
-				//console.log("merging", JSON.stringify(v1[i]), JSON.stringify(v1[j]));
-				[].push.apply(v1[i][SITES], v1[j][SITES]);
-				v1[i][SITES].sort(vaultSubSort);
+				console.log("merging " + i + " and " + j, JSON.stringify(v1[i]), JSON.stringify(v1[j]));
+				//[].push.apply(v1[i][SITES], v1[j][SITES]);
+				//v1[i][SITES].sort(sitesSort);
+				mergeSites(v1[i][SITES], v1[j][SITES]);
 				v1.splice(j, 1);
 				j--;
 			}

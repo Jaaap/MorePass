@@ -8,35 +8,14 @@
 
 	function encrypt(keyStr, data) //returns iv + "\n\n" + encryptedVault
 	{
-		return importKey(keyStr, "encrypt").then(function(key){
-
-
+		return importKey(keyStr, "encrypt").then(key => {
 			let iv = createIv();
 			let encoder = new TextEncoder("utf-8");
 			let buf = encoder.encode(data);
 
-			return crypto.subtle.encrypt(
-				{
-					name: "AES-GCM",
-					//Don't re-use initialization vectors!
-					//Always generate a new iv every time you encrypt!
-					iv: iv //window.crypto.getRandomValues(new Uint8Array(16)),
-				},
-				key, //from generateKey or importKey above
-				buf //ArrayBuffer of data you want to encrypt
-			)
-			.then(function(encrypted){
-				//returns an ArrayBuffer containing the encrypted data
-				//let decoder = new TextDecoder("utf-8");
-				//return [Uint8ArrayToBase64(iv), decoder.decode(new Uint8Array(encrypted))];
+			return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, buf).then(encrypted => {
 				return Uint8ArrayToBase64(iv) + "\n\n" + Uint8ArrayToBase64(new Uint8Array(encrypted));
-			})
-			.catch(function(err){
-				console.error("crypto.subtle.encrypt", err);
 			});
-		})
-		.catch(function(err){
-			console.error("importKey", err);
 		});
 	}
 
@@ -46,41 +25,30 @@
 		let [b64Iv, b64Data] = ivAndData.split("\n\n");
 		let iv = Base64ToUint8Array(b64Iv);
 		let data = Base64ToUint8Array(b64Data);
-		return importKey(keyStr, "decrypt").then(function(key){
-			return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(function(decrypted){ //returns an ArrayBuffer containing the decrypted data
-					let decoder = new TextDecoder("utf-8");
-					return decoder.decode(new Uint8Array(decrypted));
-				}).catch(function(err){
-					console.error("crypto.subtle.decrypt", err);
-				});
-			}).catch(function(err){
-				console.error("importKey", err);
+		return importKey(keyStr, "decrypt").then(key => {
+			return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
+				let decoder = new TextDecoder("utf-8");
+				return decoder.decode(new Uint8Array(decrypted));
 			});
+		});
 	}
 
 	function importKey(keyStr, mode)
 	{
 		let encoder = new TextEncoder("utf-8");
 		let buf = encoder.encode(keyStr);
-
-		return crypto.subtle.digest({name: "SHA-256"}, buf).then(function(result){
-				return crypto.subtle.importKey("raw", result, { name: "AES-GCM" }, false, [mode]).catch(function(err){
-					console.error("crypto.subtle.importKey", err);
-				});
-			}).catch(function(err){
-				console.error("crypto.subtle.digest", err);
-			});
+		return crypto.subtle.digest({ name: "SHA-256" }, buf).then(result => {
+			return crypto.subtle.importKey("raw", result, { name: "AES-GCM" }, false, [mode]);
+		});
 	}
 
 	function Uint8ArrayToBase64(ui8a) {
-		return btoa(Array.prototype.map.call(ui8a, function(x) { return String.fromCharCode(x); }).join(''));
+		return btoa(Array.prototype.map.call(ui8a, x => String.fromCharCode(x)).join(''));
 	}
 	function Base64ToUint8Array(b64) {
-		var binstr = atob(b64);
-		var buf = new Uint8Array(binstr.length);
-		Array.prototype.forEach.call(binstr, function (ch, i) {
-			buf[i] = ch.charCodeAt(0);
-		});
+		let binstr = atob(b64);
+		let buf = new Uint8Array(binstr.length);
+		Array.prototype.forEach.call(binstr, (ch, i) => { buf[i] = ch.charCodeAt(0); });
 		return buf;
 	}
 	//export { encrypt, decrypt };
