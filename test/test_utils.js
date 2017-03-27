@@ -37,6 +37,20 @@ describe("utils", function() {
 			mergeSites(s,[{"hostname":"abc.com"},{"hostname":"xyz.com"}]);
 			expect(s).to.deep.equal([{"hostname":"abc.com"},{"hostname":"xyz.com"}]);
 		});
-
+		it("subdomain and domain", function() {
+			let s = [{"hostname":"abc.com"}];
+			mergeSites(s,[{"hostname":"sub.abc.com"}]);
+			expect(s).to.deep.equal([{"hostname":"abc.com"}]);
+		});
+		it("path to no path", function() {
+			let s = [{"hostname":"abc.com","pathname":"def/"}];
+			mergeSites(s,[{"hostname":"abc.com"}]);
+			expect(s).to.deep.equal([{"hostname":"abc.com"}]);
+		});
+		it("port to no port", function() {
+			let s = [{"hostname":"abc.com","port":8080}];
+			mergeSites(s,[{"hostname":"abc.com"}]);
+			expect(s).to.deep.equal([{"hostname":"abc.com"}]);
+		});
 	});
 });

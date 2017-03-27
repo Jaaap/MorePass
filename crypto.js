@@ -23,14 +23,25 @@
 	{
 		//data is base64 iv + "\n\n" + base64 encrypted vault
 		let [b64Iv, b64Data] = ivAndData.split("\n\n");
-		let iv = Base64ToUint8Array(b64Iv);
-		let data = Base64ToUint8Array(b64Data);
-		return importKey(keyStr, "decrypt").then(key => {
-			return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
-				let decoder = new TextDecoder("utf-8");
-				return decoder.decode(new Uint8Array(decrypted));
-			});
-		});
+		if (b64Iv.length === 24)
+		{
+			let iv = Base64ToUint8Array(b64Iv);
+			if (iv.length === 16)
+			{
+				let data = Base64ToUint8Array(b64Data);
+		console.log(data);
+				return importKey(keyStr, "decrypt").then(key => {
+					return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
+						let decoder = new TextDecoder("utf-8");
+						return decoder.decode(new Uint8Array(decrypted));
+					});
+				});
+			}
+			else
+				throw({"name":"UnpackError","message":"Decoded IV length should be 16 but is " + iv.length});
+		}
+		else
+			throw({"name":"UnpackError","message":"IV length should be 24 but is " + b64Iv.length});
 	}
 
 	function importKey(keyStr, mode)
