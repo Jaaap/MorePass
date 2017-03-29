@@ -29,7 +29,6 @@
 			if (iv.length === 16)
 			{
 				let data = Base64ToUint8Array(b64Data);
-		console.log(data);
 				return importKey(keyStr, "decrypt").then(key => {
 					return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
 						let decoder = new TextDecoder("utf-8");
