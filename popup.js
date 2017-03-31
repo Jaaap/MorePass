@@ -7,7 +7,7 @@ function init()
 	if ("chrome" in window)
 	{
 		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
-			fillSitesetSelect(vault);
+			fillSitesetDiv(vault);
 
 			chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
 				let currentTab = tabs[0];
@@ -53,9 +53,13 @@ function init()
 	}
 	else
 	{
-		console.error("window.chrome not found");
+		console.warn("window.chrome not found");
+		fillSitesetDiv([
+			[[{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
+		]);
 	}
-
+	document.querySelector('div.left').addEventListener("click", onSitesetSelectChange, false);
+/*
 	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
 	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
 	document.querySelector('form#site>i>button.save').addEventListener("click", onSitesetSaveClick, false);
@@ -63,6 +67,7 @@ function init()
 	document.querySelector('button#importLastpass').addEventListener("click", onImportSaveClick, false);
 	document.querySelector('button#export').addEventListener("click", onExportButtonClick, false);
 	document.querySelector('button#import').addEventListener("click", onImportButtonClick, false);
+*/
 }
 
 function onExportButtonClick(evt)
@@ -82,39 +87,44 @@ function onImportButtonClick(evt)
 
 function onSitesetSelectChange(evt)
 {
-	let select = evt.target;
+	let span = evt.target;
+console.log(span);
+	if (span.tagName == "B" || span.tagName == "I")
+		span = span.parentNode;
+	if (span.tagName == "SPAN")
+	{
+		let nrOfSites = 0;
+		let urlDivs = document.querySelectorAll('div>div.url');
+		if (span.hasAttribute("data-i"))
+		{
+			chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
+				let siteset = vault[span.getAttribute("data-i")];
+				nrOfSites = siteset[SITES].length;
+				document.querySelector('input[name="username"]').value = siteset[USERNAME];
+				document.querySelector('input[name="password"]').value = siteset[PASSWORD];
+				for (let j = 0; j < nrOfSites; j++)
+				{
+					urlDivs[j].classList.add("on");
+					let inputs = urlDivs[j].querySelectorAll('input');
+					inputs[0].value = siteset[SITES][j].hostname;
+					inputs[1].value = siteset[SITES][j].pathname || "";
+				}
+			});
+		}
+		else
+		{
+			document.querySelector('input[name="username"]').value = "";
+			document.querySelector('input[name="password"]').value = "";
+		}
 
-	let nrOfSites = 0;
-	let urlDivs = document.querySelectorAll('div>div.url');
-	if (select.value && select.value >= 0)
-	{
-		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
-			let siteset = vault[select.value];
-			nrOfSites = siteset[SITES].length;
-			document.querySelector('input[name="username"]').value = siteset[USERNAME];
-			document.querySelector('input[name="password"]').value = siteset[PASSWORD];
-			for (let j = 0; j < nrOfSites; j++)
-			{
-				urlDivs[j].classList.add("on");
-				let inputs = urlDivs[j].querySelectorAll('input');
-				inputs[0].value = siteset[SITES][j].hostname;
-				inputs[1].value = siteset[SITES][j].pathname || "";
-			}
-		});
-	}
-	else
-	{
-		document.querySelector('input[name="username"]').value = "";
-		document.querySelector('input[name="password"]').value = "";
-	}
-
-	for (let j = nrOfSites; j < urlDivs.length; j++)
-	{
-		if (j > 0)
-			urlDivs[j].classList.remove("on");
-		let inputs = urlDivs[j].querySelectorAll('input');
-		inputs[0].value = "";
-		inputs[1].value = "";
+		for (let j = nrOfSites; j < urlDivs.length; j++)
+		{
+			if (j > 0)
+				urlDivs[j].classList.remove("on");
+			let inputs = urlDivs[j].querySelectorAll('input');
+			inputs[0].value = "";
+			inputs[1].value = "";
+		}
 	}
 }
 function onPlusIconClick(evt)
@@ -139,14 +149,14 @@ function onSitesetSaveClick(evt)
 	}
 	let selectValue = document.querySelector('form#site>label>select').value;
 	if (selectValue >= 0)
-		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': selectValue}, function(vault) { fillSitesetSelect(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': selectValue}, function(vault) { fillSitesetDiv(vault); });
 	else
-		chrome.runtime.sendMessage({'action': 'vault.add', 'siteset': entry}, function(vault) { fillSitesetSelect(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.add', 'siteset': entry}, function(vault) { fillSitesetDiv(vault); });
 }
 function onSitesetDeleteClick(evt)
 {
 	let selectValue = document.querySelector('form#site>label>select').value;
-	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': selectValue}, function(vault) { fillSitesetSelect(vault); });
+	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': selectValue}, function(vault) { fillSitesetDiv(vault); });
 }
 
 function onImportSaveClick(evt)
@@ -199,7 +209,7 @@ function onImportSaveClick(evt)
 		{
 			vault.push([preVault[i][1], preVault[i][2], preVault[i][3], 1]);
 		}
-		chrome.runtime.sendMessage({'action': 'vault.imprt', 'vault': vault}, function(vault) { fillSitesetSelect(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.imprt', 'vault': vault}, function(vault) { fillSitesetDiv(vault); });
 		ta.value = "";//JSON.stringify(preVault);
 		alert("Import successful");
 	}
@@ -221,8 +231,35 @@ function onImportSaveClick(evt)
 */
 }
 
-function fillSitesetSelect(dta)
+function fillSitesetDiv(dta)
 {
+	let spans = [];
+	for (let j = 0; j < dta.length; j++)
+	{
+		for (let k = 0; k < dta[j][SITES].length; k++)
+		{
+			let span = document.createElement("span");
+			span.setAttribute("data-i", j);
+			let i = document.createElement("i");
+			let b = document.createElement("b");
+			let splitHostname = tlds.splitHostname(dta[j][SITES][k].hostname);
+			i.appendChild(document.createTextNode(splitHostname.pop() + "."));
+			b.appendChild(document.createTextNode(splitHostname.pop()));
+			span.appendChild(i);
+			span.appendChild(b);
+			if (splitHostname.length)
+			{
+				i = document.createElement("i");
+				i.appendChild(document.createTextNode("." + splitHostname.join(".")));
+				span.appendChild(i);
+			}
+			spans.push(span);
+		}
+	}
+	let frag = document.createDocumentFragment();
+	spans.forEach(span => { frag.appendChild(span); });
+	document.querySelector('div.left').appendChild(frag);
+/*
 	let frags = [document.createDocumentFragment(), document.createDocumentFragment()];
 	for (let i = 0; i < dta.length; i++)
 	{
@@ -241,6 +278,7 @@ function fillSitesetSelect(dta)
 		optGroup1.removeChild(optGroup1.lastChild);
 	optGroup1.appendChild(frags[1]);
 	onSitesetSelectChange({target: optGroup0.parentNode});
+*/
 }
 
 

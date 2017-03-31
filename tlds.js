@@ -8049,7 +8049,7 @@ let getBaseDomainByTld = function(hostname, tld)
 	//console.log(hostname,tld, pos, hostname.length - tld.length);
 	return hostname.substr(pos+1);
 }
-function getBaseDomain(hostname)
+function getLongestMatchingTld(hostname)
 {
 	let longestMatchingTld = "";
 	for (let i = 0, len = tlds.length; i < len; i++)
@@ -8058,9 +8058,24 @@ function getBaseDomain(hostname)
 			if (tlds[i].length > longestMatchingTld.length)
 				longestMatchingTld = tlds[i];
 	}
-	return getBaseDomainByTld(hostname, longestMatchingTld);
-};
+	return longestMatchingTld;
+}
+function getBaseDomain(hostname)
+{
+	return getBaseDomainByTld(hostname, getLongestMatchingTld(hostname));
+}
+function splitHostname(hostname)
+{
+	let tld = getLongestMatchingTld(hostname);
+	if (tld.length)
+	{
+		let result = hostname.substr(0,hostname.length - tld.length).split(".");
+		result[result.length-1] = tld;
+		return result;
+	}
+	return hostname.split(".");
+}
 
-window.tlds = {"getBaseDomain": getBaseDomain};
+window.tlds = {"getBaseDomain": getBaseDomain, "splitHostname": splitHostname};
 
 }
