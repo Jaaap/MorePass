@@ -86,7 +86,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 	else if (message.type === 'fillLoginForm')
 	{
 		let passwordInput = getPasswordInput(document, message.tld);
-		if (passwordInput != null)
+		if (passwordInput)
 		{
 			isUnknownCredentials = false;
 			passwordInput.value = message.pass;
@@ -96,20 +96,24 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 			{
 				usernameInput.value = message.user;
 				triggerEvent(usernameInput, "input");
-				let remembermeCheckbox = getRemembermeCheckbox(passwordInput);
-				if (remembermeCheckbox)
-					remembermeCheckbox.checked = true;
-				if (message.submit)
+			}
+			let remembermeCheckbox = getRemembermeCheckbox(passwordInput);
+			if (remembermeCheckbox)
+			{
+				remembermeCheckbox.checked = true;
+			}
+			if (message.submit)
+			{
+				let submitButton = getSubmitButton(passwordInput);
+				if (submitButton)
 				{
-					let submitButton = getSubmitButton(passwordInput);
-					if (submitButton)
-					{
-						triggerMouseEvent(submitButton, "click");
-					}
+					triggerMouseEvent(submitButton, "click");
+				}
+				else //try to submit the form
+				{
+					passwordInput.form.submit();
 				}
 			}
-			else
-				console.error("Unable to find usernameInput from passwordInput", passwordInput);
 			return sendResponse(true);
 		}
 		return sendResponse(false);

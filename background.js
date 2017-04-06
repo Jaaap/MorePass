@@ -179,10 +179,9 @@ console.error(e);
 			});
 		});
 	}
-*/
 	function saveToServer(encryptedVault){
 		console.log("syncWithServer", encryptedVault);
-		var xhr = new XMLHttpRequest();
+		let xhr = new XMLHttpRequest();
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4)
 			{
@@ -205,9 +204,10 @@ console.error(e);
 		//xhr.setRequestHeader("Accept", "application/json");
 		xhr.send(encryptedVault);
 	}
+*/
 
 	/* http auth */
-	var target = "<all_urls>";
+	//let target = "<all_urls>";
 
 
 	//see https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onAuthRequired
