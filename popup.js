@@ -159,7 +159,7 @@ function showRightPane1(vaultIndex, vault)
 		urlDivs[j].classList.add("on");
 		let inputs = urlDivs[j].querySelectorAll('input');
 		inputs[0].value = siteset[SITES][j].hostname + (siteset[SITES][j].port ? ":" + siteset[SITES][j].port : "");
-		inputs[1].value = (siteset[SITES][j].pathname || "/").substr(1);
+		inputs[1].value = (siteset[SITES][j].pathname || "/").substr(1);//FIXME: old vaults have pathnames without the leading slash
 	}
 }
 function onPlusIconClick(evt)

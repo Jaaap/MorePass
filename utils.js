@@ -37,8 +37,8 @@ function parseCSV(strData, strDelimiter)
 }
 function vaultSort(aa,bb)
 {
-	let a = aa[SITES][0].hostname + "/" + aa[SITES][0].pathname;
-	let b = bb[SITES][0].hostname + "/" + bb[SITES][0].pathname;
+	let a = aa[SITES][0].hostname + aa[SITES][0].pathname;
+	let b = bb[SITES][0].hostname + bb[SITES][0].pathname;
 	if (aa[SAVEDSTATE] == bb[SAVEDSTATE])//unsaved vs saved
 		return (a < b ? -1 : +(a > b));
 	else
