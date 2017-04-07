@@ -27,7 +27,7 @@ function getPasswordInput(docRoot, tld)
 		if (action && action.length)
 		{
 			let url = new URL(action);
-			if (url && url.hostname && (url.hostname == tld || url.hostname.endsWith("." + tld)))
+			if (url && url.hostname && (!tld || url.hostname == tld || url.hostname.endsWith("." + tld)))
 				return inputs[i];
 		}
 	}
@@ -125,19 +125,20 @@ function onLoginformSubmit(evt)
 {
 	if (isUnknownCredentials)
 	{
-		let passwordInput = getPasswordInput(evt.target, "");
+		let passwordInput = getPasswordInput(evt.target);
 		let usernameInput = getUsernameInput(passwordInput) || {value:null};
 		if (passwordInput && passwordInput.value && passwordInput.value.length)// && usernameInput && usernameInput.value && usernameInput.value.length)
 			chrome.runtime.sendMessage({'action': "submit", 'username': usernameInput.value, 'password': passwordInput.value, 'docuhref': document.location.href }, function(response) { console.log(response); });
 	}
 }
 /* init */
-let passwordInput = getPasswordInput(document, "");
+let passwordInput = getPasswordInput(document);
 if (passwordInput)
 {
 	//FIXME more: don't do this for banks, ideal, DigID, Paypal etc
 	//FIXME: check form action too, might be a different domain.
-	if (!/\b(paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]$/i.test(document.location.hostname))
+	//FIXME: check dotted TLDs like .co.uk too
+	if (!/\b(digid|paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]$/i.test(document.location.hostname))
 		passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
 }
 

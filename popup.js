@@ -1,14 +1,11 @@
 (function(){
 'use strict';
-const UNSAVED = 0, SAVED = 1;
 
 function init()
 {
 	if ("chrome" in window)
 	{
 		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
-			fillSitesetDiv(vault);
-
 			chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
 				let currentTab = tabs[0];
 
@@ -17,8 +14,8 @@ function init()
 
 				if (vaultMatches.length > 0)
 				{
-					let baseDomain = tlds.getBaseDomain(tabLocation.hostname);
-					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'tld': baseDomain}, function (data) {
+					let tld = tlds.getTLD(tabLocation.hostname);
+					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'tld': tld}, function (data) {
 						if (typeof data !== 'undefined')
 						{
 							let hasLoginForm = data[0];
@@ -38,12 +35,13 @@ function init()
 								let row = vaultMatches[i];
 								if (vaultMatches.length > 1)
 									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
-								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': baseDomain, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, function (response) { window.close(); });
+								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': tld, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, function (response) { window.close(); });
 							}
 						}
 					});
 				}
 			});
+			showLeftPane(vault);
 		});
 /*
 		chrome.runtime.sendMessage({'action': 'credentials.get'}, function(email) {
@@ -51,23 +49,153 @@ function init()
 		});
 */
 	}
-	else
+	else //FIXME: remove this test/mock code
 	{
 		console.warn("window.chrome not found");
-		fillSitesetDiv([
-			[[{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
+		showLeftPane([
+			[[{"hostname":"abc.com"},{"hostname":"sub.theregister.co.uk","port":8081,"pathname":"/p/"}], "user","pass",1],
+			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
 		]);
 	}
-	document.querySelector('div.left').addEventListener("click", onSitesetSelectChange, false);
+	document.querySelector('div.left').addEventListener("click", showRightPane, false);
+	document.querySelector('div.rght b.add').addEventListener("click", onPlusIconClick, false);
+	document.querySelector('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
+	document.querySelector('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
+	document.querySelector('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
 /*
-	document.querySelector('form#site>label>select').addEventListener("change", onSitesetSelectChange, false);
-	document.querySelector('form#site>b').addEventListener("click", onPlusIconClick, false);
-	document.querySelector('form#site>i>button.save').addEventListener("click", onSitesetSaveClick, false);
-	document.querySelector('form#site>i>button.del').addEventListener("click", onSitesetDeleteClick, false);
 	document.querySelector('button#importLastpass').addEventListener("click", onImportSaveClick, false);
 	document.querySelector('button#export').addEventListener("click", onExportButtonClick, false);
 	document.querySelector('button#import').addEventListener("click", onImportButtonClick, false);
 */
+}
+
+function showLeftPane(vault)
+{
+	let spans = [];
+	for (let j = 0; j < vault.length; j++)
+	{
+		for (let site of vault[j][SITES])
+		{
+			let span = document.createElement("span");
+			span.setAttribute("data-i", j);
+			let i = document.createElement("i");
+			let b = document.createElement("b");
+			let splitHostname = tlds.splitHostname(site.hostname);
+			if (splitHostname)
+			{
+				i.appendChild(document.createTextNode(splitHostname.pop().split(".").reverse().join(".") + "."));
+				let baseDomain = splitHostname.pop();
+				b.appendChild(document.createTextNode(baseDomain));
+				span.appendChild(i);
+				span.appendChild(b);
+				if (splitHostname.length)
+				{
+					i = document.createElement("i");
+					let subDomain = "." + splitHostname.join(".");
+					baseDomain += subDomain;
+					i.appendChild(document.createTextNode(subDomain));
+					span.appendChild(i);
+				}
+				spans.push([baseDomain,span]);
+			}
+			else
+			{
+				b.appendChild(document.createTextNode(site.hostname));
+				span.appendChild(i);
+				span.appendChild(b);
+				spans.push([site.hostname,span]);
+			}
+		}
+	}
+	let frag = document.createDocumentFragment();
+	spans.sort();
+	spans.forEach(span => { frag.appendChild(span[1]); });
+	document.querySelector('div.left').appendChild(frag);
+}
+
+function showRightPane(evt)
+{
+	let span = evt.target;
+	if (span.tagName == "B" || span.tagName == "I")
+		span = span.parentNode;
+	if (span.tagName == "SPAN")
+	{
+		for (let [i,urlDiv] of Array.from(document.querySelectorAll('div>div.url')).entries())
+		{
+			if (i > 0)
+				urlDiv.classList.remove("on");
+			let inputs = urlDiv.querySelectorAll('input');
+			inputs[0].value = "";
+			inputs[1].value = "";
+		}
+		if (span.hasAttribute("data-i"))
+		{
+			let i = span.getAttribute("data-i");
+			for (let span of document.querySelectorAll('div.left>span'))
+				span.classList.remove("on");
+			for (let span of document.querySelectorAll('div.left>span[data-i="' + i + '"]'))
+				span.classList.add("on");
+			if ("chrome" in window)
+				chrome.runtime.sendMessage({'action': 'vault.get'}, showRightPane1.bind(this, i));
+			else //FIXME: remove this test/mock code
+				showRightPane1(i, [[[{"hostname":"abc.com"},{"hostname":"sub.theregister.co.uk","port":8081,"pathname":"/p/"}], "user","pass",1]]);
+		}
+		else
+		{
+			document.querySelector('input[name="username"]').value = "";
+			document.querySelector('input[name="password"]').value = "";
+		}
+	}
+}
+function showRightPane1(vaultIndex, vault)
+{
+	let siteset = vault[vaultIndex];
+	let nrOfSites = siteset[SITES].length;
+	document.querySelector('input[name="username"]').value = siteset[USERNAME];
+	document.querySelector('input[name="password"]').value = siteset[PASSWORD];
+	let urlDivs = document.querySelectorAll('div>div.url');
+	for (let j = 0; j < nrOfSites; j++)
+	{
+		urlDivs[j].classList.add("on");
+		let inputs = urlDivs[j].querySelectorAll('input');
+		inputs[0].value = siteset[SITES][j].hostname + (siteset[SITES][j].port ? ":" + siteset[SITES][j].port : "");
+		inputs[1].value = (siteset[SITES][j].pathname || "/").substr(1);
+	}
+}
+function onPlusIconClick(evt)
+{
+	document.querySelector('div>div.url:not(.on)').classList.add("on");
+}
+function onEyeIconClick(evt)
+{
+	let input = document.querySelector('div.rght input[name="password"]');
+	input.type = input.type == "password" ? "text" : "password";
+}
+
+function onSitesetSaveClick(evt)
+{
+	//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
+	let entry = [[]];
+	entry[USERNAME] = document.querySelector('div.rght input[name="username"]').value;
+	entry[PASSWORD] = document.querySelector('div.rght input[name="password"]').value;
+	for (let urlDiv of document.querySelectorAll('div>div.url'))
+	{
+		let host = urlDiv.querySelector('input[name="host"]').value;
+		if (urlDiv.classList.contains("on") && host != "")
+		{
+			entry[SITES].push(getUrlFromHref('https://' + host + "/" + urlDiv.querySelector('input[name="path"]').value));
+		}
+	}
+	let vaultIdx = document.querySelector('div.left>span.on').getAttribute("data-i");
+	if (vaultIdx >= 0)
+		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': vaultIdx}, function(vault) { showLeftPane(vault); });
+	else
+		chrome.runtime.sendMessage({'action': 'vault.add', 'siteset': entry}, function(vault) { showLeftPane(vault); });
+}
+function onSitesetDeleteClick(evt)
+{
+	let selectValue = document.querySelector('form#site>label>select').value;
+	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': selectValue}, function(vault) { showLeftPane(vault); });
 }
 
 function onExportButtonClick(evt)
@@ -83,80 +211,6 @@ function onImportButtonClick(evt)
 	chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp, "vault": document.querySelector('form#imex textarea').value}, function(result) {
 		document.querySelector('form#imex textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
 	});
-}
-
-function onSitesetSelectChange(evt)
-{
-	let span = evt.target;
-console.log(span);
-	if (span.tagName == "B" || span.tagName == "I")
-		span = span.parentNode;
-	if (span.tagName == "SPAN")
-	{
-		let nrOfSites = 0;
-		let urlDivs = document.querySelectorAll('div>div.url');
-		if (span.hasAttribute("data-i"))
-		{
-			chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
-				let siteset = vault[span.getAttribute("data-i")];
-				nrOfSites = siteset[SITES].length;
-				document.querySelector('input[name="username"]').value = siteset[USERNAME];
-				document.querySelector('input[name="password"]').value = siteset[PASSWORD];
-				for (let j = 0; j < nrOfSites; j++)
-				{
-					urlDivs[j].classList.add("on");
-					let inputs = urlDivs[j].querySelectorAll('input');
-					inputs[0].value = siteset[SITES][j].hostname;
-					inputs[1].value = siteset[SITES][j].pathname || "";
-				}
-			});
-		}
-		else
-		{
-			document.querySelector('input[name="username"]').value = "";
-			document.querySelector('input[name="password"]').value = "";
-		}
-
-		for (let j = nrOfSites; j < urlDivs.length; j++)
-		{
-			if (j > 0)
-				urlDivs[j].classList.remove("on");
-			let inputs = urlDivs[j].querySelectorAll('input');
-			inputs[0].value = "";
-			inputs[1].value = "";
-		}
-	}
-}
-function onPlusIconClick(evt)
-{
-	document.querySelector('div>div.url:not(.on)').classList.add("on");
-}
-
-function onSitesetSaveClick(evt)
-{
-	//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
-	let entry = [[]];
-	entry[USERNAME] = document.querySelector('input[name="username"]').value;
-	entry[PASSWORD] = document.querySelector('input[name="password"]').value;
-	let urlDivs = document.querySelectorAll('div>div.url');
-	for (let i = 0; i < urlDivs.length; i++)
-	{
-		let host = urlDivs[i].querySelector('input[name="host"]').value;
-		if (urlDivs[i].classList.contains("on") && host != "")
-		{
-			entry[SITES].push(getUrlFromHref('https://' + host + "/" + urlDivs[i].querySelector('input[name="path"]').value));
-		}
-	}
-	let selectValue = document.querySelector('form#site>label>select').value;
-	if (selectValue >= 0)
-		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': selectValue}, function(vault) { fillSitesetDiv(vault); });
-	else
-		chrome.runtime.sendMessage({'action': 'vault.add', 'siteset': entry}, function(vault) { fillSitesetDiv(vault); });
-}
-function onSitesetDeleteClick(evt)
-{
-	let selectValue = document.querySelector('form#site>label>select').value;
-	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': selectValue}, function(vault) { fillSitesetDiv(vault); });
 }
 
 function onImportSaveClick(evt)
@@ -209,7 +263,7 @@ function onImportSaveClick(evt)
 		{
 			vault.push([preVault[i][1], preVault[i][2], preVault[i][3], 1]);
 		}
-		chrome.runtime.sendMessage({'action': 'vault.imprt', 'vault': vault}, function(vault) { fillSitesetDiv(vault); });
+		chrome.runtime.sendMessage({'action': 'vault.imprt', 'vault': vault}, function(vault) { showLeftPane(vault); });
 		ta.value = "";//JSON.stringify(preVault);
 		alert("Import successful");
 	}
@@ -228,56 +282,6 @@ function onImportSaveClick(evt)
 			reader.readAsText(file);
 		}
 	}
-*/
-}
-
-function fillSitesetDiv(dta)
-{
-	let spans = [];
-	for (let j = 0; j < dta.length; j++)
-	{
-		for (let k = 0; k < dta[j][SITES].length; k++)
-		{
-			let span = document.createElement("span");
-			span.setAttribute("data-i", j);
-			let i = document.createElement("i");
-			let b = document.createElement("b");
-			let splitHostname = tlds.splitHostname(dta[j][SITES][k].hostname);
-			i.appendChild(document.createTextNode(splitHostname.pop() + "."));
-			b.appendChild(document.createTextNode(splitHostname.pop()));
-			span.appendChild(i);
-			span.appendChild(b);
-			if (splitHostname.length)
-			{
-				i = document.createElement("i");
-				i.appendChild(document.createTextNode("." + splitHostname.join(".")));
-				span.appendChild(i);
-			}
-			spans.push(span);
-		}
-	}
-	let frag = document.createDocumentFragment();
-	spans.forEach(span => { frag.appendChild(span); });
-	document.querySelector('div.left').appendChild(frag);
-/*
-	let frags = [document.createDocumentFragment(), document.createDocumentFragment()];
-	for (let i = 0; i < dta.length; i++)
-	{
-		let opt = document.createElement("option");
-		opt.value = i;
-		opt.appendChild(document.createTextNode(dta[i][SITES].map(function(loc){ return loc.pathname ? loc.hostname + "/" + loc.pathname : loc.hostname; }).join(", ")));
-		if (dta[i].length > 3)
-			frags[dta[i][SAVEDSTATE]].appendChild(opt);
-	}
-	let optGroup0 = document.querySelector('optgroup#ssNew');
-	while (optGroup0.hasChildNodes())
-		optGroup0.removeChild(optGroup0.lastChild);
-	optGroup0.appendChild(frags[0]);
-	let optGroup1 = document.querySelector('optgroup#ssSaved');
-	while (optGroup1.hasChildNodes())
-		optGroup1.removeChild(optGroup1.lastChild);
-	optGroup1.appendChild(frags[1]);
-	onSitesetSelectChange({target: optGroup0.parentNode});
 */
 }
 

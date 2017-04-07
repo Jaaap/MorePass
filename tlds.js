@@ -8049,33 +8049,39 @@ let getBaseDomainByTld = function(hostname, tld)
 	//console.log(hostname,tld, pos, hostname.length - tld.length);
 	return hostname.substr(pos+1);
 }
-function getLongestMatchingTld(hostname)
+function getTLD(hostname)
 {
+	if (/^[\d.]*$/.test(hostname))
+		return hostname;
 	let longestMatchingTld = "";
-	for (let i = 0, len = tlds.length; i < len; i++)
+	for (let tld of tlds)
 	{
-		if (hostname.endsWith(tlds[i])) //FIXME: apply the * and ! rules too
-			if (tlds[i].length > longestMatchingTld.length)
-				longestMatchingTld = tlds[i];
+		if (hostname.endsWith("." + tld)) //FIXME: apply the * and ! rules too
+			if (tld.length > longestMatchingTld.length)
+				longestMatchingTld = tld;
 	}
 	return longestMatchingTld;
 }
 function getBaseDomain(hostname)
 {
-	return getBaseDomainByTld(hostname, getLongestMatchingTld(hostname));
+	if (!/^[\d.]*$/.test(hostname))
+		return getBaseDomainByTld(hostname, getTLD(hostname));
 }
 function splitHostname(hostname)
 {
-	let tld = getLongestMatchingTld(hostname);
-	if (tld.length)
+	if (!/^[\d.]*$/.test(hostname))
 	{
-		let result = hostname.substr(0,hostname.length - tld.length).split(".");
-		result[result.length-1] = tld;
-		return result;
+		let tld = getTLD(hostname);
+		if (tld.length)
+		{
+			let result = hostname.substr(0,hostname.length - tld.length).split(".");
+			result[result.length-1] = tld;
+			return result;
+		}
+		return hostname.split(".");
 	}
-	return hostname.split(".");
 }
 
-window.tlds = {"getBaseDomain": getBaseDomain, "splitHostname": splitHostname};
+window.tlds = {"getTLD": getTLD, "getBaseDomain": getBaseDomain, "splitHostname": splitHostname};
 
 }
