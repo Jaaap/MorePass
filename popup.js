@@ -5,17 +5,15 @@ function init()
 {
 	if ("chrome" in window)
 	{
-		chrome.runtime.sendMessage({'action': 'vault.get'}, function(vault) {
-			chrome.tabs.query({'active': true, 'currentWindow': true}, function (tabs) {
+		chrome.runtime.sendMessage({'action': 'vault.get'}, vault => {
+			chrome.tabs.query({'active': true, 'currentWindow': true}, tabs => {
 				let currentTab = tabs[0];
-
 				let tabLocation = new URL(currentTab.url);
 				let vaultMatches = getVaultMatches(vault, tabLocation);
-
 				if (vaultMatches.length > 0)
 				{
 					let tld = tlds.getTLD(tabLocation.hostname);
-					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'tld': tld}, function (data) {
+					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'tld': tld}, data => {
 						if (typeof data !== 'undefined')
 						{
 							let hasLoginForm = data[0];
@@ -35,7 +33,7 @@ function init()
 								let row = vaultMatches[i];
 								if (vaultMatches.length > 1)
 									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
-								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': tld, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, function (response) { window.close(); });
+								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': tld, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, response => { window.close(); });
 							}
 						}
 					});
@@ -43,15 +41,11 @@ function init()
 			});
 			showLeftPane(vault);
 		});
-/*
-		chrome.runtime.sendMessage({'action': 'credentials.get'}, function(email) {
-			document.querySelector('form#exprt input#email').value = email;
-		});
-*/
 	}
-	else //FIXME: remove this test/mock code
+	else
 	{
 		console.warn("window.chrome not found");
+		//FIXME: remove this test/mock code
 		showLeftPane([
 			[[{"hostname":"abc.com"},{"hostname":"sub.theregister.co.uk","port":8081,"pathname":"/p/"}], "user","pass",1],
 			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
