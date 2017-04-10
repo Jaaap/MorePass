@@ -13,31 +13,47 @@
 	}
 
 	Vault.prototype = {
-		get: function() {
+		get: function()
+		{
 			return this.vault;
 		},
-		add: function(siteset) {
+		add: function(siteset)
+		{
 			siteset[LASTMODIFIED] = (new Date()).getTime();
 			this.vault.push(siteset);
 			this.vault.sort(vaultSort);
 			return this.save();
 		},
-		edit: function(idx, siteset) {
+		edit: function(idx, siteset)
+		{
 			siteset[SAVEDSTATE] = SAVED;
 			siteset[LASTMODIFIED] = (new Date()).getTime();
 			this.vault[idx] = siteset;
 			this.vault.sort(vaultSort);
 			return this.save();
 		},
-		del: function(idx) {
+		del: function(idx)
+		{
 			this.vault.splice(idx, 1);
 			return this.save();
 		},
-		imprt: function(newVault) {
+		imprt: function(newVault)
+		{
 			this.vault = newVault;
 			return this.save();
 		},
-		save: function() {
+		save: function()
+		{
+			//FIXME: remove this migration code
+			for (let siteset of this.vault)
+			{
+				for (let site of siteset[SITES])
+					if ("pathname" in site && !/^\//.test(site.pathname))
+						site.pathname = "/" + site.pathname;
+				if (siteset.length <= LASTMODIFIED)
+					siteset[LASTMODIFIED] = (new Date()).getTime();
+			}
+console.log(this.vault);
 			chrome.storage.local.set({"vault": this.vault});
 			return this.vault;
 		},

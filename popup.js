@@ -48,6 +48,7 @@ function init()
 		//FIXME: remove this test/mock code
 		showLeftPane([
 			[[{"hostname":"abc.com"},{"hostname":"sub.theregister.co.uk","port":8081,"pathname":"/p/"}], "user","pass",1],
+			[[{"hostname":"mustard04.lan.betterbe.com","port":8081,"pathname":"/p/"}], "user","pass",1],
 			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
 		]);
 	}
@@ -122,13 +123,13 @@ function showRightPane(evt)
 			inputs[0].value = "";
 			inputs[1].value = "";
 		}
+		for (let onspan of document.querySelectorAll('div.left>span'))
+			onspan.classList.remove("on");
 		if (span.hasAttribute("data-i"))
 		{
 			let i = span.getAttribute("data-i");
-			for (let span of document.querySelectorAll('div.left>span'))
-				span.classList.remove("on");
-			for (let span of document.querySelectorAll('div.left>span[data-i="' + i + '"]'))
-				span.classList.add("on");
+			for (let ispan of document.querySelectorAll('div.left>span[data-i="' + i + '"]'))
+				ispan.classList.add("on");
 			if ("chrome" in window)
 				chrome.runtime.sendMessage({'action': 'vault.get'}, showRightPane1.bind(this, i));
 			else //FIXME: remove this test/mock code
@@ -136,6 +137,7 @@ function showRightPane(evt)
 		}
 		else
 		{
+			span.classList.add("on");
 			document.querySelector('input[name="username"]').value = "";
 			document.querySelector('input[name="password"]').value = "";
 		}
