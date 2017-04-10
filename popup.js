@@ -52,6 +52,7 @@ function init()
 			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
 		]);
 	}
+	document.querySelector('ul.menu').addEventListener("click", menuClick, false);
 	document.querySelector('div.left').addEventListener("click", showRightPane, false);
 	document.querySelector('div.rght b.add').addEventListener("click", onPlusIconClick, false);
 	document.querySelector('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
@@ -64,6 +65,16 @@ function init()
 */
 }
 
+function menuClick(evt)
+{
+	let li = evt.target;
+	if (li.tagName == "LI")
+	{
+		Array.from(document.querySelectorAll('ul.menu>li,div.main>div')).forEach(elem => { elem.classList.remove("on"); });
+		li.classList.add("on");
+		Array.from(document.querySelectorAll('div.' + li.getAttribute('data-href').split(/,/).join(',div.'))).forEach(div => { div.classList.add("on"); });
+	}
+}
 function showLeftPane(vault)
 {
 	let spans = [];

@@ -14,7 +14,10 @@ input[type="text"],input[type="password"] { width: 414px; height: 20px; border: 
 ul.menu { margin: 0; padding: 0; }
 ul.menu>li { height: 26px; margin: 0; padding: 0 12px; list-style: none; display: inline-block; cursor: pointer; font-size: 20px; font-weight: bold; }
 ul.menu>li.on,ul.menu>li:hover,div.left>span.on,b.add:hover { background-color: #FFF; color: #420; }
-div.left,div.rght { position: absolute; top: 26px; left: 0; bottom: 0; width: 234px; }
+div.main { position: absolute; top: 26px; left: 0; bottom: 0; right: 0; }
+div.left,div.rght,div.import,div.export { display: none; }
+div.on { display: block; }
+div.left,div.rght { position: absolute; top: 0; left: 0; bottom: 0; width: 234px; }
 div.left { overflow-y: scroll; direction: rtl; }
 div.rght { left: 243px; width: 541px; }
 div.left>span { display: block; width: 209px; margin-right: 10px; cursor: pointer; direction: ltr; white-space: nowrap; }
@@ -31,39 +34,51 @@ label>span { display: inline-block; width: 103px; }
 b.add,b.reveal { cursor: pointer; display: inline-block; width: 14px; height: 14px; line-height: 11px; border-radius: 7px; vertical-align: text-bottom; }
 input[name="host"],input[name="path"] { width: calc(50% - 37px); }
 button { margin: 2px 4px 0 0; }
+
+textarea { width: calc(100% - 8px); height: 508px; }
 </style>
 </head>
 <body>
-	<ul class="menu"><li class="on">Sites &amp; Passwords</li><li>Import</li><li>Export</li></ul><div class="left">
-		<span class="on"><i></i><b>*Add new*</b></span>
-	</div><div class="rght">
-		<form>
-			<div class="more">
-				<div class="url on">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-				<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
-			</div><b class="add" title="Add another site with the same credentials (like ebay.com, ebay.ca, ebay.de)">+</b>
-			<label><span>Username</span><input type="text" name="username"/></label>
-			<label><span>Password</span><input type="password" name="password"/><b class="reveal">👁</b></label>
-			<button class="save">Save site</button> <button type="button" class="del">Delete site</button>
-		</form>
+	<ul class="menu"><li class="on" data-href="left,rght">Sites &amp; Passwords</li><li data-href="import">Import</li><li data-href="export">Export</li></ul>
+	<div class="main">
+		<div class="left on">
+			<span class="on"><i></i><b>*Add new*</b></span>
+		</div><div class="rght on">
+			<form>
+				<div class="more">
+					<div class="url on">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
+				</div><b class="add" title="Add another site with the same credentials (like ebay.com, ebay.ca, ebay.de)">+</b>
+				<label><span>Username</span><input type="text" name="username"/></label>
+				<label><span>Password</span><input type="password" name="password"/><b class="reveal">👁</b></label>
+				<button class="save">Save site</button> <button type="button" class="del">Delete site</button>
+			</form>
+		</div><div class="import">
+			<div>Import a previously exported vault or a LastPass CSV file (paste below)</div>
+			<textarea name="import"></textarea>
+			<button>Import</button>
+		</div><div class="export">
+			<textarea name="export"></textarea>
+			<button>Export</button>
+		</div>
 	</div>
 </body>
 </html>
