@@ -58,10 +58,24 @@ function init()
 	document.querySelector('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
 	document.querySelector('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
 	document.querySelector('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
+	document.querySelector('div.import button').addEventListener("click", onImportButtonClick, false);
 /*
 	document.querySelector('button#importLastpass').addEventListener("click", onImportSaveClick, false);
 	document.querySelector('button#export').addEventListener("click", onExportButtonClick, false);
 	document.querySelector('button#import').addEventListener("click", onImportButtonClick, false);
+
+
+
+<div class="import">
+	<div>Import a previously exported vault or a LastPass CSV file (paste below)</div>
+	<div>
+		<label><span>Type</span><input type="radio" name="importtype" value="pd" checked/>pass.dog encrypted</label>
+		<label><input type="radio" name="importtype" value="lp"/>LastPass CSV</label>
+	</div>
+	<label><span>Passphase</span><input type="password" name="importpwd"/></label>
+	<textarea name="import"></textarea>
+	<button>Import</button>
+</div>
 */
 }
 
@@ -77,6 +91,12 @@ function menuClick(evt)
 }
 function showLeftPane(vault)
 {
+	let oldSpans = document.querySelectorAll('div.left>span');
+	let i = oldSpans.length;
+	while (--i)//leave the first one in place
+	{
+		oldSpans[i].parentNode.removeChild(oldSpans[i]);
+	}
 	let spans = [];
 	for (let j = 0; j < vault.length; j++)
 	{
@@ -201,8 +221,8 @@ function onSitesetSaveClick(evt)
 }
 function onSitesetDeleteClick(evt)
 {
-	let selectValue = document.querySelector('form#site>label>select').value;
-	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': selectValue}, function(vault) { showLeftPane(vault); });
+	let vaultIdx = document.querySelector('div.left>span.on').getAttribute("data-i");
+	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': vaultIdx}, function(vault) { showLeftPane(vault); });
 }
 
 function onExportButtonClick(evt)
@@ -214,15 +234,25 @@ function onExportButtonClick(evt)
 }
 function onImportButtonClick(evt)
 {
-	let passp = document.querySelector('input#passphrase').value;
-	chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp, "vault": document.querySelector('form#imex textarea').value}, function(result) {
-		document.querySelector('form#imex textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
-	});
+	let importtype = document.querySelector('input[name="importtype"]:checked').value;
+	if (importtype == "pd")
+	{
+		let passp = document.querySelector('div.import input[name="importpwd"]');
+		chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp.value, "vault": document.querySelector('div.import textarea').value}, function(result) {
+			passp.value = "";
+			document.querySelector('div.import textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
+			chrome.runtime.sendMessage({'action': 'vault.get'}, vault => { showLeftPane(vault); });
+		});
+	}
+	else if (importtype == "lp")
+	{
+		importLastpassCSV();
+	}
 }
 
-function onImportSaveClick(evt)
+function importLastpassCSV()
 {
-	let ta = document.querySelector('#imex textarea');
+	let ta = document.querySelector('div.import textarea');
 	if (ta && ta.value && ta.value.indexOf('url,username,password,') == 0) // LastPass style
 	{
 		let uup = parseCSV(ta.value);

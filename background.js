@@ -114,23 +114,26 @@ console.log(this.vault);
 			}
 			else if (request.action === "vault.decrypt.merge")
 			{
-				decrypt(request.passphrase, request.vault).then(decryptedVault => {
-					//FIXME: catch decrypt errors and handle them accordingly
-					try {
-						let decryptedVaultObj = JSON.parse(decryptedVault);
-						let merged = mergeVaults(vaultObj.get(), decryptedVaultObj);
-console.log(vaultObj.get().length + " + " + decryptedVaultObj.length + " = " + merged.length);
-console.log(JSON.stringify(merged));
-						//FIXME: enable this line
-						//vaultObj.imprt(mergeVaults(vaultObj.get(), decryptedVaultObj));
-						sendResponse({"success":true});
-					} catch(e) {
+				try {
+					decrypt(request.passphrase, request.vault).then(decryptedVault => {
+						try {
+							let decryptedVaultObj = JSON.parse(decryptedVault);
+							let merged = mergeVaults(vaultObj.get(), decryptedVaultObj);
+	//console.log(vaultObj.get().length + " + " + decryptedVaultObj.length + " = " + merged.length);
+	//console.log(JSON.stringify(merged));
+							vaultObj.imprt(merged);
+							sendResponse({"success":true});
+						} catch(e) {
+	console.error(e);
+							sendResponse({"success":false,"error":"Invalid JSON"});
+						}
+					}).catch(err => {
+						sendResponse({"success":false,"error":"Decryption error"});
+					});
+				} catch(e) {
 console.error(e);
-						sendResponse({"success":false,"error":"Invalid JSON"});
-					}
-				}).catch(err => {
-					sendResponse({"success":false,"error":"Decryption error"});
-				});
+					sendResponse({"success":false,"error":e.message});
+				}
 				return true;
 			}
 /*
