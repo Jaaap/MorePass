@@ -119,8 +119,8 @@ console.log(this.vault);
 						try {
 							let decryptedVaultObj = JSON.parse(decryptedVault);
 							let merged = mergeVaults(vaultObj.get(), decryptedVaultObj);
-	//console.log(vaultObj.get().length + " + " + decryptedVaultObj.length + " = " + merged.length);
-	//console.log(JSON.stringify(merged));
+	console.log(vaultObj.get().length + " + " + decryptedVaultObj.length + " = " + merged.length);
+	console.log(JSON.stringify(merged));
 							vaultObj.imprt(merged);
 							sendResponse({"success":true});
 						} catch(e) {

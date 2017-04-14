@@ -139,13 +139,32 @@ function mergeVaults(vault1,vault2)
 	for (let entry of v2)
 		entry[SITES].sort(sitesSort);
 
+
+
+	//FIXME: remove this migration code
+	for (let siteset of v1)
+	{
+		for (let site of siteset[SITES])
+			if ("pathname" in site && !/^\//.test(site.pathname))
+				site.pathname = "/" + site.pathname;
+		if (siteset.length <= LASTMODIFIED)
+			siteset[LASTMODIFIED] = (new Date()).getTime();
+	}
+	for (let siteset of v2)
+	{
+		for (let site of siteset[SITES])
+			if ("pathname" in site && !/^\//.test(site.pathname))
+				site.pathname = "/" + site.pathname;
+		if (siteset.length <= LASTMODIFIED)
+			siteset[LASTMODIFIED] = (new Date()).getTime();
+	}
+
 	//step 1: add different lines of v2 to v1
 	for (let entry of v2)
 	{
 		//If this exact line is not in v1 somewhere, append it to v1
 		if (!contains(v1, entry))
 		{
-			console.log("adding", entry);
 			v1.push(entry);
 		}
 	}
@@ -157,8 +176,11 @@ function mergeVaults(vault1,vault2)
 			if (i != j && v1[i][USERNAME] == v1[j][USERNAME] && v1[i][PASSWORD] == v1[j][PASSWORD])
 			{
 				//merge i and j
-				console.log("merging " + i + " and " + j, JSON.stringify(v1[i]), JSON.stringify(v1[j]));
 				mergeSiteArrays(v1[i][SITES], v1[j][SITES]);
+				if (v1[i][SAVEDSTATE] === UNSAVED)
+					v1[i][SAVEDSTATE] = v1[j][SAVEDSTATE];
+				if (v1[i][LASTMODIFIED] < v1[j][LASTMODIFIED])
+					v1[i][LASTMODIFIED] = v1[j][LASTMODIFIED];
 				v1.splice(j, 1);
 				j--;
 			}
