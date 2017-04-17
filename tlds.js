@@ -8051,25 +8051,28 @@ let getBaseDomainByTld = function(hostname, tld)
 }
 function getTLD(hostname)
 {
-	if (hostname == "localhost" || /^[\d.]*$/.test(hostname))
-		return hostname;
-	let longestMatchingTld = "";
-	for (let tld of tlds)
+	if (hostname != null)
 	{
-		if (hostname.endsWith("." + tld)) //FIXME: apply the * and ! rules too
-			if (tld.length > longestMatchingTld.length)
-				longestMatchingTld = tld;
+		if (hostname == "localhost" || /^[\d.]*$/.test(hostname))
+			return hostname;
+		let longestMatchingTld = "";
+		for (let tld of tlds)
+		{
+			if (hostname.endsWith("." + tld)) //FIXME: apply the * and ! rules too
+				if (tld.length > longestMatchingTld.length)
+					longestMatchingTld = tld;
+		}
+		return longestMatchingTld;
 	}
-	return longestMatchingTld;
 }
 function getBaseDomain(hostname)
 {
-	if (hostname != "localhost" && !/^[\d.]*$/.test(hostname))
+	if (hostname != null && hostname != "localhost" && !/^[\d.]*$/.test(hostname))
 		return getBaseDomainByTld(hostname, getTLD(hostname));
 }
 function splitHostname(hostname)
 {
-	if (hostname != "localhost" && !/^[\d.]*$/.test(hostname))
+	if (hostname != null && hostname != "localhost" && !/^[\d.]*$/.test(hostname))
 	{
 		let tld = getTLD(hostname);
 		if (tld.length)

@@ -138,7 +138,7 @@ if (passwordInput)
 	//FIXME more: don't do this for banks, ideal, DigID, Paypal etc
 	//FIXME: check form action too, might be a different domain.
 	//FIXME: check dotted TLDs like .co.uk too
-	if (!/\b(digid|paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]$/i.test(document.location.hostname))
+	if (!/\b(digid|paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]+$/i.test(document.location.hostname))
 		passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
 }
 

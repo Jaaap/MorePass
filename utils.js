@@ -89,22 +89,25 @@ function mergeTwoSites(h1, h2)//returns 1 when mergeable into the first, 2 when 
 	//"hostname","port","pathname","search"
 	let su1 = `:${h1.port||""}${h1.pathname||""}${h1.search||""}`;//works only because pathname starts with a '/' and search starts with a '?' (when filled)
 	let su2 = `:${h2.port||""}${h2.pathname||""}${h2.search||""}`;//works only because pathname starts with a '/' and search starts with a '?' (when filled)
-	if (h1.hostname === h2.hostname)
+	if ("hostname" in h1 && "hostname" in h2)
 	{
-		if (su1 === su2 || su2.startsWith(su1))
-			return 1;
-		else if (su1.startsWith(su2))
-			return 2;
-	}
-	else if (h1.hostname.endsWith("." + h2.hostname))//h2.hostname is shorter
-	{
-		if (su1 === su2 || su1.startsWith(su2))//su2 is shorter
-			return 2;
-	}
-	else if (h2.hostname.endsWith("." + h1.hostname))//h1.hostname is shorter
-	{
-		if (su1 === su2 || su2.startsWith(su1))//su1 is shorter
-			return 1;
+		if (h1.hostname === h2.hostname)
+		{
+			if (su1 === su2 || su2.startsWith(su1))
+				return 1;
+			else if (su1.startsWith(su2))
+				return 2;
+		}
+		else if (h1.hostname.endsWith("." + h2.hostname))//h2.hostname is shorter
+		{
+			if (su1 === su2 || su1.startsWith(su2))//su2 is shorter
+				return 2;
+		}
+		else if (h2.hostname.endsWith("." + h1.hostname))//h1.hostname is shorter
+		{
+			if (su1 === su2 || su2.startsWith(su1))//su1 is shorter
+				return 1;
+		}
 	}
 	return 0;
 }
