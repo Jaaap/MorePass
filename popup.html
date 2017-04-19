@@ -6,17 +6,20 @@
 <script src="tlds.js" defer></script>
 <script src="utils.js" defer></script>
 <script src="popup.js" defer></script>
+<link rel="stylesheet" href="chrome://browser/content/extension.css"/>
 <style>
-html,body { margin: 0; padding: 0; height: 100%; }
+html,body { margin: 0; padding: 0; height: 100%; background-color: #FFF; }
 body,label { font-size: 16px; }
-body { font-family: Verdana, Helvetica; background: radial-gradient(ellipse at center center, #8B4513 0%, #420 60%, #210 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 584px; width: 784px; }
+body { font-family: Verdana, Helvetica; background-color: #EEE; background: radial-gradient(ellipse at center center, #8B4513 0%, #420 60%, #210 100%) repeat scroll 0 0 / 100% 130%; color: #FFF; height: 584px; width: 784px; }
 input[type="text"],input[type="password"] { width: 414px; height: 20px; border: 0 none; padding: 3px; }
-input[type="radio"] { display: inline-block; }
+input[type="radio"],input[type="checkbox"] { display: inline-block; }
+input[type="radio"] { -moz-appearance: radio; }
+input[type="checkbox"] { -moz-appearance: checkbox; }
 ul.menu { margin: 0; padding: 0; }
 ul.menu>li { height: 26px; margin: 0; padding: 0 12px; list-style: none; display: inline-block; cursor: pointer; font-size: 20px; font-weight: bold; }
 ul.menu>li.on,ul.menu>li:hover,div.left>span.on,b.add:hover { background-color: #FFF; color: #420; }
 
-div.main { position: absolute; top: 26px; left: 0; bottom: 0; right: 0; }
+div.main { position: absolute; top: 48px; left: 0; height: 536px; width: 784px; }
 div.left,div.rght,div.import,div.export { display: none; }
 div.import,div.export { padding-left: 6px; }
 div.on { display: block; }
@@ -33,19 +36,20 @@ div.left>span>i { display: inline-block; font-style: normal; color: #AAA; vertic
 div.left>span>i:first-child { width: 50px; text-align: right; margin-right: 0; }
 div.left>span:hover:before,div.left>span.on:before { position: absolute; left: 209px; border: 10px solid transparent; content: " "; height: 0; width: 0; pointer-events: none; border-left-color: #FFF; }
 
-div.more { display: inline-block; width: calc(100% - 20px); }
+div.more { display: inline-block; width: calc(100% - 22px); }
 div.url { display: none; height: 22px; }
 div.url.on { display: block; }
 div.url>span { display: inline-block; width: 40px; }
 label>span { display: inline-block; width: 103px; }
 b.add,b.reveal { cursor: pointer; display: inline-block; width: 14px; height: 14px; line-height: 11px; border-radius: 7px; vertical-align: text-bottom; }
-input[name="host"],input[name="path"] { width: calc(50% - 37px); }
+input[name="host"],input[name="path"] { width: calc(50% - 36px); }
 button { margin: 2px 4px 0 0; }
 
 textarea { width: calc(100% - 8px); height: 457px; }
 </style>
 </head>
 <body>
+	<div><label><span> Passphrase</span><input type="password" name="passphrase"/></label><label><input type="checkbox" name=""/>Save passphrase (insecure)</div>
 	<ul class="menu"><li class="on" data-href="left,rght">Sites &amp; Passwords</li><li data-href="import">Import</li><li data-href="export">Export</li></ul>
 	<div class="main">
 		<div class="left on">
@@ -84,7 +88,6 @@ textarea { width: calc(100% - 8px); height: 457px; }
 				<label><span>Type</span><input type="radio" name="importtype" value="pd" checked/>pass.dog encrypted</label>
 				<label><input type="radio" name="importtype" value="lp"/>LastPass CSV</label>
 			</div>
-			<label><span>Passphase</span><input type="password" name="importpwd"/></label>
 			<textarea name="import"></textarea>
 			<button>Import</button>
 		</div><div class="export">

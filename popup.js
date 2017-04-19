@@ -59,24 +59,7 @@ function init()
 	document.querySelector('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
 	document.querySelector('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
 	document.querySelector('div.import button').addEventListener("click", onImportButtonClick, false);
-/*
-	document.querySelector('button#importLastpass').addEventListener("click", onImportSaveClick, false);
-	document.querySelector('button#export').addEventListener("click", onExportButtonClick, false);
-	document.querySelector('button#import').addEventListener("click", onImportButtonClick, false);
-
-
-
-<div class="import">
-	<div>Import a previously exported vault or a LastPass CSV file (paste below)</div>
-	<div>
-		<label><span>Type</span><input type="radio" name="importtype" value="pd" checked/>pass.dog encrypted</label>
-		<label><input type="radio" name="importtype" value="lp"/>LastPass CSV</label>
-	</div>
-	<label><span>Passphase</span><input type="password" name="importpwd"/></label>
-	<textarea name="import"></textarea>
-	<button>Import</button>
-</div>
-*/
+	document.querySelector('div.export button').addEventListener("click", onExportButtonClick, false);
 }
 
 function menuClick(evt)
@@ -186,7 +169,7 @@ function showRightPane1(vaultIndex, vault)
 		urlDivs[j].classList.add("on");
 		let inputs = urlDivs[j].querySelectorAll('input');
 		inputs[0].value = siteset[SITES][j].hostname + (siteset[SITES][j].port ? ":" + siteset[SITES][j].port : "");
-		inputs[1].value = (siteset[SITES][j].pathname || "/").substr(1);//FIXME: old vaults have pathnames without the leading slash
+		inputs[1].value = (siteset[SITES][j].pathname || "/").substr(1);
 	}
 }
 function onPlusIconClick(evt)
@@ -225,19 +208,12 @@ function onSitesetDeleteClick(evt)
 	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': vaultIdx}, function(vault) { showLeftPane(vault); });
 }
 
-function onExportButtonClick(evt)
-{
-	let passp = document.querySelector('input#passphrase').value;
-	chrome.runtime.sendMessage({'action': 'vault.encrypt', "passphrase": passp}, function(encryptedVault) {
-		document.querySelector('form#imex textarea').value = encryptedVault;
-	});
-}
 function onImportButtonClick(evt)
 {
 	let importtype = document.querySelector('input[name="importtype"]:checked').value;
 	if (importtype == "pd")
 	{
-		let passp = document.querySelector('div.import input[name="importpwd"]');
+		let passp = document.querySelector('input[name="passphrase"]').value;
 		chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp.value, "vault": document.querySelector('div.import textarea').value}, function(result) {
 			passp.value = "";
 			document.querySelector('div.import textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
@@ -248,6 +224,14 @@ function onImportButtonClick(evt)
 	{
 		importLastpassCSV();
 	}
+}
+
+function onExportButtonClick(evt)
+{
+	let passp = document.querySelector('input[name="passphrase"]').value;
+	chrome.runtime.sendMessage({'action': 'vault.encrypt', "passphrase": passp}, function(encryptedVault) {
+		document.querySelector('div.export textarea').value = encryptedVault;
+	});
 }
 
 function importLastpassCSV()

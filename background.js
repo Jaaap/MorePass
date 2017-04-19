@@ -125,7 +125,7 @@ console.log(this.vault);
 							sendResponse({"success":true});
 						} catch(e) {
 	console.error(e);
-							sendResponse({"success":false,"error":"Invalid JSON"});
+							sendResponse({"success":false,"error":e.getMessage()});
 						}
 					}).catch(err => {
 						sendResponse({"success":false,"error":"Decryption error"});
