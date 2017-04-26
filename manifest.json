@@ -20,9 +20,12 @@
 		}
 	],
 	"permissions": [
-		"*://pass.dog/*",
+		"http://*/*",
+		"https://*/*",
 		"tabs",
 		"activeTab",
+		"webRequest",
+		"webRequestBlocking",
 		"storage"
 	],
 	"browser_action": {

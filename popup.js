@@ -323,61 +323,6 @@ function importLastpassCSV()
 }
 
 
-function getVaultMatches(vault, tabLocation)
-{
-	let topScore = 0;
-	let vaultMatches = [];
-	for (let i = 0; i < vault.length; i++)
-	{
-		if (vault[i][SAVEDSTATE] == SAVED)
-		{
-			let bookmarks = vault[i][SITES];
-			let localTopScore = 0;
-			for (let j = 0; j < bookmarks.length; j++)
-			{
-				let score = getLocationMatchScore(tabLocation, bookmarks[j]);
-				if (score > localTopScore)
-					localTopScore = score;
-			}
-			if (localTopScore > 0)
-			{
-				if (localTopScore > topScore)
-				{
-					topScore = localTopScore;
-					vaultMatches = [vault[i]];
-				}
-				else if (localTopScore == topScore)
-					vaultMatches.push(vault[i]);
-			}
-		}
-	}
-	return vaultMatches;
-}
-
-function getLocationMatchScore(tabLoc, bmLoc)
-{
-	let score = 0;
-	if (tabLoc.hostname === bmLoc.hostname)
-		score += 2000 + bmLoc.hostname.length;
-	else if (tabLoc.hostname.endsWith("." + bmLoc.hostname))
-		score += 1000 + bmLoc.hostname.length;
-	if (score > 0)
-	{
-		if (bmLoc.port && tabLoc.port === bmLoc.port)
-			score += 100;
-		if (bmLoc.pathname && bmLoc.pathname)
-		{
-			if (tabLoc.pathname.startsWith("/"+bmLoc.pathname))
-				score += 20 + (20 * Math.atan(bmLoc.pathname.length));
-			else
-				score += 10 + (10 * Math.atan(getMatchingSubstringLength(tabLoc.pathname, "/"+bmLoc.pathname) - 1)); //don't count the slash
-		}
-		if (bmLoc.search && tabLoc.search && tabLoc.search.indexOf(bmLoc.search) > -1)
-			score += 1 + Math.atan(bmLoc.search.length);
-	}
-	return Math.round(100000 * score);
-}
-
 document.addEventListener("DOMContentLoaded", init);
 
 })();

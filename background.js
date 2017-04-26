@@ -53,7 +53,6 @@
 				if (siteset.length <= LASTMODIFIED)
 					siteset[LASTMODIFIED] = (new Date()).getTime();
 			}
-console.log(this.vault);
 			chrome.storage.local.set({"vault": this.vault});
 			return this.vault;
 		},
@@ -119,8 +118,8 @@ console.log(this.vault);
 						try {
 							let decryptedVaultObj = JSON.parse(decryptedVault);
 							let merged = mergeVaults(vaultObj.get(), decryptedVaultObj);
-	console.log(vaultObj.get().length + " + " + decryptedVaultObj.length + " = " + merged.length);
-	console.log(JSON.stringify(merged));
+	//console.log(vaultObj.get().length + " + " + decryptedVaultObj.length + " = " + merged.length);
+	//console.log(JSON.stringify(merged));
 							vaultObj.imprt(merged);
 							sendResponse({"success":true});
 						} catch(e) {
@@ -157,87 +156,42 @@ console.error(e);
 	});
 
 
-/*
-	function saveVaultFromServer(encryptedVault)
-	{
-		decrypt(credentials.passphrase, encryptedVault).then(function(newVault){
-			//console.log("saveVaultFromServer", newVault);
-			vaultObj.imprt(JSON.parse(newVault));
-		});
-	}
-	function getFromServer(email, passphrase)
-	{
-		var xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4)
-			{
-				if (xhr.status == "200")
-				{
-					console.log(xhr.responseText);
-					saveVaultFromServer(xhr.responseText);
-				}
-				else
-				{
-					console.warn("getFromServer", "xhr", xhr);
-				}
-			}
-		};
-		xhr.ontimeout = function()
-		{
-			console.warn("getFromServer", "timeout", xhr);
-		};
-		xhr.open("GET", "https://pass.dog/s/index.pl", true);
-		xhr.send();
-	}
 
-	function uploadVaultToServer(email, passphrase, vault)
-	{
-		encrypt(passphrase, JSON.stringify(vault)).then(function(encryptedVault){
-			sign(passphrase, encryptedVault).then(function(signature){
-				saveToServer(signature + "\n\n" + encryptedVault);
-			});
-		});
-	}
-	function saveToServer(encryptedVault){
-		console.log("syncWithServer", encryptedVault);
-		let xhr = new XMLHttpRequest();
-		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4)
-			{
-				if (xhr.status == "200")
-				{
-					console.log(xhr.responseText);
-				}
-				else
-				{
-					console.warn("saveToServer", "xhr", xhr);
-				}
-			}
-		};
-		xhr.ontimeout = function()
-		{
-			console.warn("saveToServer", "timeout", xhr);
-		};
-		xhr.open("PUT", "https://pass.dog/s/index.pl", true);
-		//xhr.setRequestHeader("Content-type", options.contentType);
-		//xhr.setRequestHeader("Accept", "application/json");
-		xhr.send(encryptedVault);
-	}
-*/
 
 	/* http auth */
-	//let target = "<all_urls>";
+	let target = "<all_urls>";
 
+	let pendingRequests = [];
 
-	//see https://developer.mozilla.org/en-US/Add-ons/WebExtensions/API/webRequest/onAuthRequired
+	function completed(requestDetails) {
+		//console.log("completed: " + requestDetails.requestId);
+		let index = pendingRequests.indexOf(requestDetails.requestId);
+		if (index > -1) {
+			pendingRequests.splice(index, 1);
+		}
+	}
 
+	function provideCredentialsAsync(requestDetails) {
+		// If we have seen this request before, then assume our credentials were bad and give up.
+		if (pendingRequests.indexOf(requestDetails.requestId) > -1) {
+			console.log("bad credentials for: " + requestDetails.requestId);
+			return {cancel: true};
+			
+		} else {
+			pendingRequests.push(requestDetails.requestId);
+			console.log("providing credentials for: " + requestDetails.requestId);
+			let tabLocation = new URL(requestDetails.url);
+			let vaultMatches = getVaultMatches(vaultObj.get(), tabLocation);
+			// we can return a promise that will be resolved with the stored credentials
+			if (vaultMatches.length > 0)
+				return {'authCredentials': {'username': vaultMatches[0][USERNAME], 'password': vaultMatches[0][PASSWORD]}};
+			return {'cancel': true};
+		}
+	}
 
+	browser.webRequest.onAuthRequired.addListener(provideCredentialsAsync, {urls: [target]}, ["blocking"]);
 
-	/*
-	chrome.browserAction.onClicked.addListener(function(){ console.log("browserAction.onClicked"); });
-	if ("onInstalled" in chrome.runtime) chrome.runtime.onInstalled.addListener(function(){ console.log("runtime.onInstalled"); });
-	if ("onStartup" in chrome.runtime) chrome.runtime.onStartup.addListener(function(){ console.log("runtime.onStartup"); });
-	chrome.tabs.onUpdated.addListener(function(){ console.log("tabs.onUpdated"); });
-	*/
+	browser.webRequest.onCompleted.addListener(completed, {urls: [target]});
+	browser.webRequest.onErrorOccurred.addListener(completed, {urls: [target]});
 
 }
