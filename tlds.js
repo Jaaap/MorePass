@@ -8053,7 +8053,7 @@ function getTLD(hostname)
 {
 	if (hostname != null)
 	{
-		if (hostname == "localhost" || /^[\d.]*$/.test(hostname))
+		if (hostname.indexOf(".") == -1 || /^[\d.]*$/.test(hostname))
 			return hostname;
 		let longestMatchingTld = "";
 		for (let tld of tlds)
@@ -8067,12 +8067,12 @@ function getTLD(hostname)
 }
 function getBaseDomain(hostname)
 {
-	if (hostname != null && hostname != "localhost" && !/^[\d.]*$/.test(hostname))
+	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
 		return getBaseDomainByTld(hostname, getTLD(hostname));
 }
 function splitHostname(hostname)
 {
-	if (hostname != null && hostname != "localhost" && !/^[\d.]*$/.test(hostname))
+	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
 	{
 		let tld = getTLD(hostname);
 		if (tld.length)
