@@ -6,6 +6,9 @@
 <script src="tlds.js" defer></script>
 <script src="utils.js" defer></script>
 <script src="popup.js" defer></script>
+<!--
+TODO: Remove extension.css stylesheet
+-->
 <link rel="stylesheet" href="chrome://browser/content/extension.css"/>
 <style>
 html,body { margin: 0; padding: 0; height: 100%; background-color: #FFF; }
@@ -31,8 +34,11 @@ div.import>div { margin: 2px 0; }
 
 
 div.left>span { display: block; width: 209px; margin-right: 10px; cursor: pointer; direction: ltr; white-space: nowrap; }
-div.left>span>b { display: inline-block; font-weight: normal; }
-div.left>span>i { display: inline-block; font-style: normal; color: #AAA; vertical-align: top; }
+div.left>span>b,div.left>span>i { display: inline-block; }
+div.left>span>b { font-weight: normal; }
+div.left>span.h3>b { display: block; font-weight: bold; padding-left: 40px; }
+div.left>span.h3>i { display: none; }
+div.left>span>i { font-style: normal; color: #AAA; vertical-align: top; }
 div.left>span>i:first-child { width: 50px; text-align: right; margin-right: 0; }
 div.left>span:hover:before,div.left>span.on:before { position: absolute; left: 209px; border: 10px solid transparent; content: " "; height: 0; width: 0; pointer-events: none; border-left-color: #FFF; }
 
@@ -52,9 +58,7 @@ textarea { width: calc(100% - 8px); height: 457px; }
 	<div><label><span> Passphrase</span><input type="password" name="passphrase"/></label><label><input type="checkbox" name=""/>Save passphrase (insecure)</div>
 	<ul class="menu"><li class="on" data-href="left,rght">Sites &amp; Passwords</li><li data-href="import">Import</li><li data-href="export">Export</li></ul>
 	<div class="main">
-		<div class="left on">
-			<span class="on"><i></i><b>*Add new*</b></span>
-		</div><div class="rght on">
+		<div class="left on"></div><div class="rght on">
 			<form>
 				<div class="more">
 					<div class="url on">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>

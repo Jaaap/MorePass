@@ -48,7 +48,7 @@ function init()
 		//FIXME: remove this test/mock code
 		showLeftPane([
 			[[{"hostname":"abc.com"},{"hostname":"sub.theregister.co.uk","port":8081,"pathname":"/p/"}], "user","pass",1],
-			[[{"hostname":"mustard04.lan.betterbe.com","port":8081,"pathname":"/p/"}], "user","pass",1],
+			[[{"hostname":"mustard04.lan.betterbe.com","port":8081,"pathname":"/p/"}], "user","pass",0],
 			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
 		]);
 	}
@@ -72,54 +72,70 @@ function menuClick(evt)
 		Array.from(document.querySelectorAll('div.' + li.getAttribute('data-href').split(/,/).join(',div.'))).forEach(div => { div.classList.add("on"); });
 	}
 }
-function showLeftPane(vault)
+function makeSpan(j, tld, baseDomain, cls)
 {
-	let oldSpans = document.querySelectorAll('div.left>span');
-	let i = oldSpans.length;
-	while (--i)//leave the first one in place
-	{
-		oldSpans[i].parentNode.removeChild(oldSpans[i]);
-	}
+	let span = document.createElement("span");
+	if (cls != null)
+		span.className = cls;
+	if (j != null)
+		span.setAttribute("data-i", j);
+	let i = document.createElement("i");
+	let b = document.createElement("b");
+	if (tld != null)
+		i.appendChild(document.createTextNode(tld));
+	b.appendChild(document.createTextNode(baseDomain));
+	span.appendChild(i);
+	span.appendChild(b);
+	return span;
+}
+function makeLeftpaneSpans(vault, savedState)
+{
 	let spans = [];
 	for (let j = 0; j < vault.length; j++)
 	{
-		for (let site of vault[j][SITES])
+		if (vault[j][SAVEDSTATE] === savedState)
 		{
-			let span = document.createElement("span");
-			span.setAttribute("data-i", j);
-			let i = document.createElement("i");
-			let b = document.createElement("b");
-			let splitHostname = tlds.splitHostname(site.hostname);
-			if (splitHostname)
+			for (let site of vault[j][SITES])
 			{
-				i.appendChild(document.createTextNode(splitHostname.pop().split(".").reverse().join(".") + "."));
-				let baseDomain = splitHostname.pop();
-				b.appendChild(document.createTextNode(baseDomain));
-				span.appendChild(i);
-				span.appendChild(b);
-				if (splitHostname.length)
+				let splitHostname = tlds.splitHostname(site.hostname);
+				if (splitHostname)
 				{
-					i = document.createElement("i");
-					let subDomain = "." + splitHostname.join(".");
-					baseDomain += subDomain;
-					i.appendChild(document.createTextNode(subDomain));
-					span.appendChild(i);
+					let tld = splitHostname.pop().split(".").reverse().join(".") + ".";
+					let baseDomain = splitHostname.pop();
+					let span = makeSpan(j, tld, baseDomain);
+					if (splitHostname.length)
+					{
+						let i = document.createElement("i");
+						let subDomain = "." + splitHostname.join(".");
+						baseDomain += subDomain;
+						i.appendChild(document.createTextNode(subDomain));
+						span.appendChild(i);
+					}
+					spans.push([baseDomain,span]);
 				}
-				spans.push([baseDomain,span]);
-			}
-			else
-			{
-				b.appendChild(document.createTextNode(site.hostname));
-				span.appendChild(i);
-				span.appendChild(b);
-				spans.push([site.hostname,span]);
+				else
+				{
+					let span = makeSpan(j, null, site.hostname);
+					spans.push([site.hostname,span]);
+				}
 			}
 		}
 	}
-	let frag = document.createDocumentFragment();
 	spans.sort();
-	spans.forEach(span => { frag.appendChild(span[1]); });
-	document.querySelector('div.left').appendChild(frag);
+	return spans;
+}
+function showLeftPane(vault)
+{
+	let frag = document.createDocumentFragment();
+	frag.appendChild(makeSpan(null, null, "New", "h3"));
+	frag.appendChild(makeSpan(null, null, "*Add new*", "on"));
+	makeLeftpaneSpans(vault, UNSAVED).forEach(span => { frag.appendChild(span[1]); });
+	frag.appendChild(makeSpan(null, null, "Saved", "h3"));
+	makeLeftpaneSpans(vault, SAVED).forEach(span => { frag.appendChild(span[1]); });
+	let divLeft = document.querySelector('div.left');
+	let last;
+	while (last = divLeft.lastChild) divLeft.removeChild(last);
+	divLeft.appendChild(frag);
 }
 
 function showRightPane(evt)
