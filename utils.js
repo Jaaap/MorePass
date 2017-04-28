@@ -48,22 +48,32 @@ function getLocationMatchScore(tabLoc, bmLoc)
 {
 	let score = 0;
 	if (tabLoc.hostname === bmLoc.hostname)
-		score += 2000 + bmLoc.hostname.length;
+		score = 2000 + bmLoc.hostname.length;
 	else if (tabLoc.hostname.endsWith("." + bmLoc.hostname))
-		score += 1000 + bmLoc.hostname.length;
-	if (score > 0)
+		score = 1000 + bmLoc.hostname.length;
+	else
+		return 0;
+
+	if (bmLoc.port)
 	{
-		if (bmLoc.port && tabLoc.port === bmLoc.port)
+		if (tabLoc.port === bmLoc.port)
 			score += 100;
-		if (bmLoc.pathname && bmLoc.pathname)
-		{
-			if (tabLoc.pathname.startsWith("/"+bmLoc.pathname))
-				score += 20 + (20 * Math.atan(bmLoc.pathname.length));
-			else
-				score += 10 + (10 * Math.atan(getMatchingSubstringLength(tabLoc.pathname, "/"+bmLoc.pathname) - 1)); //don't count the slash
-		}
-		if (bmLoc.search && tabLoc.search && tabLoc.search.indexOf(bmLoc.search) > -1)
+		else
+			return 0;
+	}
+	if (bmLoc.pathname)
+	{
+		if (tabLoc.pathname.startsWith(bmLoc.pathname))
+			score += 20 + (20 * Math.atan(bmLoc.pathname.length));
+		else
+			return 0;
+	}
+	if (bmLoc.search)
+	{
+		if (tabLoc.search && tabLoc.search.indexOf(bmLoc.search) > -1)
 			score += 1 + Math.atan(bmLoc.search.length);
+		else
+			return 0;
 	}
 	return Math.round(100000 * score);
 }

@@ -10,6 +10,7 @@ function init()
 				let currentTab = tabs[0];
 				let tabLocation = new URL(currentTab.url);
 				let vaultMatches = getVaultMatches(vault, tabLocation);
+console.log("vaultMatches", vaultMatches);
 				if (vaultMatches.length > 0)
 				{
 					let tld = tlds.getTLD(tabLocation.hostname);
@@ -25,7 +26,7 @@ function init()
 								if (pageUsernameValue && pageUsernameValue.length)
 								{
 									for (let j = 0; j < vaultMatches.length; j++)
-										if (pageUsernameValue == vaultMatches[j][USERNAME])
+										if (pageUsernameValue == vaultMatches[j][USERNAME])//FIXME: same username could be in vaultMatches multiple times
 											i = j + 1;
 									if (i >= vaultMatches.length)
 										i = 0;
