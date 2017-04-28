@@ -175,8 +175,6 @@ console.error(e);
 		// If we have seen this request before, then assume our credentials were bad and give up.
 		if (pendingRequests.indexOf(requestDetails.requestId) > -1) {
 			console.log("bad credentials for: " + requestDetails.requestId);
-			return {cancel: true};
-			
 		} else {
 			pendingRequests.push(requestDetails.requestId);
 			console.log("providing credentials for: " + requestDetails.requestId);
@@ -185,7 +183,6 @@ console.error(e);
 			// we can return a promise that will be resolved with the stored credentials
 			if (vaultMatches.length > 0)
 				return {'authCredentials': {'username': vaultMatches[0][USERNAME], 'password': vaultMatches[0][PASSWORD]}};
-			return {'cancel': true};
 		}
 	}
 
