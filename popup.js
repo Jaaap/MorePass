@@ -53,16 +53,25 @@ console.log("vaultMatches", vaultMatches);
 			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
 		]);
 	}
-	document.querySelector('ul.menu').addEventListener("click", menuClick, false);
-	document.querySelector('div.left').addEventListener("click", showRightPane, false);
-	document.querySelector('div.rght b.add').addEventListener("click", onPlusIconClick, false);
-	document.querySelector('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
-	document.querySelector('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
-	document.querySelector('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
-	document.querySelector('div.import button').addEventListener("click", onImportButtonClick, false);
-	document.querySelector('div.export button').addEventListener("click", onExportButtonClick, false);
+	$('form#passphrase').addEventListener("submit", onPassphraseformChange, false);
+	$('ul.menu').addEventListener("click", menuClick, false);
+	$('div.left').addEventListener("click", showRightPane, false);
+	$('div.rght b.add').addEventListener("click", onPlusIconClick, false);
+	$('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
+	$('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
+	$('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
+	$('div.import button').addEventListener("click", onImportButtonClick, false);
+	$('div.export button').addEventListener("click", onExportButtonClick, false);
 }
 
+function onPassphraseformChange(evt)
+{
+	evt.preventDefault();
+	chrome.runtime.sendMessage({'action': 'passphrase.set', 'passprase':$('input[name="passphrase"]').value}, result => {
+		$('input[name="passphrase"]').setCustomValidity(result.passphrasecorrect ? "" : "Passprase incorrect, please try again.");
+		//TODO: show the user that the passphrase is correct
+	});
+}
 function menuClick(evt)
 {
 	let li = evt.target;
@@ -133,7 +142,7 @@ function showLeftPane(vault)
 	makeLeftpaneSpans(vault, UNSAVED).forEach(span => { frag.appendChild(span[1]); });
 	frag.appendChild(makeSpan(null, null, "Saved", "h3"));
 	makeLeftpaneSpans(vault, SAVED).forEach(span => { frag.appendChild(span[1]); });
-	let divLeft = document.querySelector('div.left');
+	let divLeft = $('div.left');
 	let last;
 	while (last = divLeft.lastChild) divLeft.removeChild(last);
 	divLeft.appendChild(frag);
@@ -169,8 +178,8 @@ function showRightPane(evt)
 		else
 		{
 			span.classList.add("on");
-			document.querySelector('input[name="username"]').value = "";
-			document.querySelector('input[name="password"]').value = "";
+			$('input[name="username"]').value = "";
+			$('input[name="password"]').value = "";
 		}
 	}
 }
@@ -178,8 +187,8 @@ function showRightPane1(vaultIndex, vault)
 {
 	let siteset = vault[vaultIndex];
 	let nrOfSites = siteset[SITES].length;
-	document.querySelector('input[name="username"]').value = siteset[USERNAME];
-	document.querySelector('input[name="password"]').value = siteset[PASSWORD];
+	$('input[name="username"]').value = siteset[USERNAME];
+	$('input[name="password"]').value = siteset[PASSWORD];
 	let urlDivs = document.querySelectorAll('div>div.url');
 	for (let j = 0; j < nrOfSites; j++)
 	{
@@ -191,11 +200,11 @@ function showRightPane1(vaultIndex, vault)
 }
 function onPlusIconClick(evt)
 {
-	document.querySelector('div>div.url:not(.on)').classList.add("on");
+	$('div>div.url:not(.on)').classList.add("on");
 }
 function onEyeIconClick(evt)
 {
-	let input = document.querySelector('div.rght input[name="password"]');
+	let input = $('div.rght input[name="password"]');
 	input.type = input.type == "password" ? "text" : "password";
 }
 
@@ -203,8 +212,8 @@ function onSitesetSaveClick(evt)
 {
 	//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
 	let entry = [[]];
-	entry[USERNAME] = document.querySelector('div.rght input[name="username"]').value;
-	entry[PASSWORD] = document.querySelector('div.rght input[name="password"]').value;
+	entry[USERNAME] = $('div.rght input[name="username"]').value;
+	entry[PASSWORD] = $('div.rght input[name="password"]').value;
 	for (let urlDiv of document.querySelectorAll('div>div.url'))
 	{
 		let host = urlDiv.querySelector('input[name="host"]').value;
@@ -213,7 +222,7 @@ function onSitesetSaveClick(evt)
 			entry[SITES].push(getUrlFromHref('https://' + host + "/" + urlDiv.querySelector('input[name="path"]').value));
 		}
 	}
-	let vaultIdx = document.querySelector('div.left>span.on').getAttribute("data-i");
+	let vaultIdx = $('div.left>span.on').getAttribute("data-i");
 	if (vaultIdx >= 0)
 		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': vaultIdx}, function(vault) { showLeftPane(vault); });
 	else
@@ -221,19 +230,19 @@ function onSitesetSaveClick(evt)
 }
 function onSitesetDeleteClick(evt)
 {
-	let vaultIdx = document.querySelector('div.left>span.on').getAttribute("data-i");
+	let vaultIdx = $('div.left>span.on').getAttribute("data-i");
 	chrome.runtime.sendMessage({'action': 'vault.del', 'idx': vaultIdx}, function(vault) { showLeftPane(vault); });
 }
 
 function onImportButtonClick(evt)
 {
-	let importtype = document.querySelector('input[name="importtype"]:checked').value;
+	let importtype = $('input[name="importtype"]:checked').value;
 	if (importtype == "pd")
 	{
-		let passp = document.querySelector('input[name="passphrase"]').value;
-		chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp.value, "vault": document.querySelector('div.import textarea').value}, function(result) {
+		let passp = $('input[name="passphrase"]').value;
+		chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp.value, "vault": $('div.import textarea').value}, function(result) {
 			passp.value = "";
-			document.querySelector('div.import textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
+			$('div.import textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
 			chrome.runtime.sendMessage({'action': 'vault.get'}, vault => { showLeftPane(vault); });
 		});
 	}
@@ -245,15 +254,15 @@ function onImportButtonClick(evt)
 
 function onExportButtonClick(evt)
 {
-	let passp = document.querySelector('input[name="passphrase"]').value;
+	let passp = $('input[name="passphrase"]').value;
 	chrome.runtime.sendMessage({'action': 'vault.encrypt', "passphrase": passp}, function(encryptedVault) {
-		document.querySelector('div.export textarea').value = encryptedVault;
+		$('div.export textarea').value = encryptedVault;
 	});
 }
 
 function importLastpassCSV()
 {
-	let ta = document.querySelector('div.import textarea');
+	let ta = $('div.import textarea');
 	if (ta && ta.value && ta.value.indexOf('url,username,password,') == 0) // LastPass style
 	{
 		let uup = parseCSV(ta.value);
