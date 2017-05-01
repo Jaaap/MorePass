@@ -8070,6 +8070,11 @@ function getBaseDomain(hostname)
 	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
 		return getBaseDomainByTld(hostname, getTLD(hostname));
 }
+function getBaseDomainWithoutTLD(hostname)
+{
+	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
+		return getBaseDomainByTld(hostname, getTLD(hostname)).split(".")[0];
+}
 function splitHostname(hostname)
 {
 	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
@@ -8085,6 +8090,6 @@ function splitHostname(hostname)
 	}
 }
 
-window.tlds = {"getTLD": getTLD, "getBaseDomain": getBaseDomain, "splitHostname": splitHostname};
+window.tlds = {"getTLD": getTLD, "getBaseDomain": getBaseDomain, "getBaseDomainWithoutTLD": getBaseDomainWithoutTLD, "splitHostname": splitHostname};
 
 }

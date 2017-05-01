@@ -142,10 +142,10 @@ if (passwordInput)
 			if (action && action.length)
 			{
 				let actionUrl = new URL(action);
-				if (blacklist.indexOf(tlds.getBaseDomain(actionUrl)) > -1)
+				if (blacklist.indexOf(tlds.getBaseDomainWithoutTLD(actionUrl)) > -1)
 					return;
 			}
-			if (blacklist.indexOf(tlds.getBaseDomain(document.location.hostname)) == -1)
+			if (blacklist.indexOf(tlds.getBaseDomainWithoutTLD(document.location.hostname)) == -1)
 				return;
 			//catch new credentials
 			passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
