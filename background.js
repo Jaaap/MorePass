@@ -1,7 +1,12 @@
 //import * as crypto from "crypto";
 {
 	'use strict';
-	let credentials = {};
+	let passphrase = null;
+	let blacklist = [];
+
+	chrome.storage.local.get("blacklist", function(result){
+		blacklist = result.blacklist;
+	});
 
 	function Vault()
 	{
@@ -59,9 +64,6 @@
 	};
 
 	let vaultObj = new Vault();
-	chrome.storage.local.get("credentials", function(result){
-		credentials = result.credentials;
-	});
 
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		if (sender.tab) //from content
@@ -135,19 +137,16 @@ console.error(e);
 				}
 				return true;
 			}
-/*
-			else if (request.action === "credentials.set")
+			else if (request.action === "passphrase.set")
 			{
-				credentials = {"email": request.email};
-				chrome.storage.local.set({"credentials": credentials});
-				//uploadVaultToServer(request.email, "pass hash FIXME", vaultObj.get());
-				//getFromServer(request.email, "pass hash FIXME");
+				passphrase = request.passphrase;
+				//TODO: decrypt vault, unset passphrase if it's wrong, return actual correctless boolean;
+				sendResponse({"passphrasecorrect": true});
 			}
-			else if (request.action === "credentials.get")
+			else if (request.action === "passphrase.info")
 			{
-				sendResponse(credentials.email);
+				sendResponse({"set": passphrase!=null});
 			}
-*/
 			else
 			{
 				console.warn("Unknown action", request.action);
@@ -175,8 +174,6 @@ console.error(e);
 		// If we have seen this request before, then assume our credentials were bad and give up.
 		if (pendingRequests.indexOf(requestDetails.requestId) > -1) {
 			console.log("bad credentials for: " + requestDetails.requestId);
-			return {cancel: true};
-			
 		} else {
 			pendingRequests.push(requestDetails.requestId);
 			console.log("providing credentials for: " + requestDetails.requestId);
@@ -185,7 +182,6 @@ console.error(e);
 			// we can return a promise that will be resolved with the stored credentials
 			if (vaultMatches.length > 0)
 				return {'authCredentials': {'username': vaultMatches[0][USERNAME], 'password': vaultMatches[0][PASSWORD]}};
-			return {'cancel': true};
 		}
 	}
 

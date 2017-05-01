@@ -2,6 +2,10 @@
 const UNSAVED = 0, SAVED = 1;
 const SITES = 0, USERNAME = 1, PASSWORD = 2, SAVEDSTATE = 3, LASTMODIFIED = 4;
 const SITEPROPS = ["hostname","port","pathname","search"];
+function $(sel)
+{
+	return document.querySelector(sel);
+}
 function getUrlFromHref(href)
 {
 	let url = new URL(href);

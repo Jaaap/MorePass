@@ -28,4 +28,4 @@ While in development, you can clone or download this WebExtension, then ...
 
 For **Chrome** go to chrome://extensions/, enable "Developer mode" and then "Load unpacked extension...". Point it to the root of the pass.dog folder/dir you just created.
 
-For **Firefox**, go to about:addons, Click on the gear icon (⚙) pulldown, click "Install Addon From File..." and open the pass.dog.xpi file.
+For **Firefox**, go to about:addons, Click on the gear icon (⚙) pulldown, click "Install Addon From File..." and open the pass.dog.xpi file. If the pass.dog.xpi file does not exist it can be created with the command `zip -r pass.dog.xpi *` in the root of the pass.dog folder/dir. This requires the xpinstall.signatures.required setting in about:config to be set to false.
