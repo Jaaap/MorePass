@@ -108,11 +108,12 @@ function makeLeftpaneSpans(vault, savedState)
 			for (let site of vault[j][SITES])
 			{
 				let splitHostname = tlds.splitHostname(site.hostname);
+				let span;
 				if (splitHostname)
 				{
 					let tld = splitHostname.pop().split(".").reverse().join(".") + ".";
 					let baseDomain = splitHostname.pop();
-					let span = makeSpan(j, tld, baseDomain);
+					span = makeSpan(j, tld, baseDomain);
 					if (splitHostname.length)
 					{
 						let i = document.createElement("i");
@@ -125,8 +126,14 @@ function makeLeftpaneSpans(vault, savedState)
 				}
 				else
 				{
-					let span = makeSpan(j, null, site.hostname);
+					span = makeSpan(j, null, site.hostname);
 					spans.push([site.hostname,span]);
+				}
+				if (site.pathname)
+				{
+					let i = document.createElement("i");
+					i.appendChild(document.createTextNode(site.pathname));
+					span.appendChild(i);
 				}
 			}
 		}
