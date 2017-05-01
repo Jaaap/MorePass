@@ -112,7 +112,7 @@ function makeLeftpaneSpans(vault, savedState)
 						i.appendChild(document.createTextNode(subDomain));
 						span.appendChild(i);
 					}
-					spans.push([baseDomain,span]);
+					spans.push([baseDomain + (site.pathname||""),span]);
 				}
 				else
 				{
@@ -214,7 +214,7 @@ function onSitesetSaveClick(evt)
 		}
 	}
 	let vaultIdx = document.querySelector('div.left>span.on').getAttribute("data-i");
-	if (vaultIdx >= 0)
+	if (vaultIdx)
 		chrome.runtime.sendMessage({'action': 'vault.edit', 'siteset': entry, 'idx': vaultIdx}, function(vault) { showLeftPane(vault); });
 	else
 		chrome.runtime.sendMessage({'action': 'vault.add', 'siteset': entry}, function(vault) { showLeftPane(vault); });
