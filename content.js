@@ -135,11 +135,22 @@ function onLoginformSubmit(evt)
 let passwordInput = getPasswordInput(document);
 if (passwordInput)
 {
-	//FIXME more: don't do this for banks, ideal, DigID, Paypal etc
-	//FIXME: check form action too, might be a different domain.
-	//FIXME: check dotted TLDs like .co.uk too
-	if (!/\b(digid|paypal|ing|abnamro|rabobank|deutschebank|deutsche-bank|commerzbank|kfw|hypovereinsbank|chase|bankamerica|wellsfargo|citicorp|pncbank|hsbc|bnymellon|usbank|suntrust|statestreet|capitalone|bbt)\.[a-z]+$/i.test(document.location.hostname))
-		passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
+	chrome.runtime.sendMessage({'action': "blacklist.get"}, blacklist => {
+		if (blacklist != null)
+		{
+			let action = passwordInput.form.action;
+			if (action && action.length)
+			{
+				let actionUrl = new URL(action);
+				if (blacklist.indexOf(tlds.getBaseDomain(actionUrl)) > -1)
+					return;
+			}
+			if (blacklist.indexOf(tlds.getBaseDomain(document.location.hostname)) == -1)
+				return;
+			//catch new credentials
+			passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
+		}
+	});
 }
 
 

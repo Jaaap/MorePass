@@ -42,6 +42,7 @@ console.log("vaultMatches", vaultMatches);
 			});
 			showLeftPane(vault);
 		});
+		chrome.runtime.sendMessage({'action': 'blacklist.get'}, blacklist => { if (blacklist != null) { $('textarea[name="blacklist"]').value = blacklist.join("\n"); } });
 	}
 	else
 	{
@@ -49,10 +50,11 @@ console.log("vaultMatches", vaultMatches);
 		//FIXME: remove this test/mock code
 		showLeftPane([
 			[[{"hostname":"abc.com"},{"hostname":"sub.theregister.co.uk","port":8081,"pathname":"/p/"}], "user","pass",1],
-			[[{"hostname":"mustard04.lan.betterbe.com","port":8081,"pathname":"/p/"}], "user","pass",0],
+			[[{"hostname":"sun01.lan.company.com","port":8081,"pathname":"/p/"}], "user","pass",0],
 			[[{"hostname":"192.168.0.1"},{"hostname":"abc.com","port":8080,"pathname":"/p/"},{"hostname":"abc.com","port":8081,"pathname":"/p/"},{"hostname":"theregister.co.uk"},{"hostname":"sub.theregister.co.uk"}],"user","pass",1]
 		]);
 	}
+	$('form#settings').addEventListener("submit", onSettingsformChange, false);
 	$('form#passphrase').addEventListener("submit", onPassphraseformChange, false);
 	$('ul.menu').addEventListener("click", menuClick, false);
 	$('div.left').addEventListener("click", showRightPane, false);
@@ -64,10 +66,15 @@ console.log("vaultMatches", vaultMatches);
 	$('div.export button').addEventListener("click", onExportButtonClick, false);
 }
 
+function onSettingsformChange(evt)
+{
+	evt.preventDefault();
+	chrome.runtime.sendMessage({'action': 'blacklist.set', 'blacklist': $('textarea[name="blacklist"]').value.split(/\r?\n/)});
+}
 function onPassphraseformChange(evt)
 {
 	evt.preventDefault();
-	chrome.runtime.sendMessage({'action': 'passphrase.set', 'passprase':$('input[name="passphrase"]').value}, result => {
+	chrome.runtime.sendMessage({'action': 'passphrase.set', 'passprase': $('input[name="passphrase"]').value}, result => {
 		$('input[name="passphrase"]').setCustomValidity(result.passphrasecorrect ? "" : "Passprase incorrect, please try again.");
 		//TODO: show the user that the passphrase is correct
 	});

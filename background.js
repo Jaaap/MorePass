@@ -2,10 +2,11 @@
 {
 	'use strict';
 	let passphrase = null;
-	let blacklist = [];
+	let blacklist = ['abnamro', 'bankamerica', 'bbt', 'bnymellon', 'capitalone', 'chase', 'citicorp', 'commerzbank', 'deutsche-bank', 'deutschebank', 'digid', 'hsbc', 'hypovereinsbank', 'ing', 'kfw', 'paypal', 'pncbank', 'rabobank', 'statestreet', 'suntrust', 'usbank', 'wellsfargo'];
 
 	chrome.storage.local.get("blacklist", function(result){
-		blacklist = result.blacklist;
+		if (result.blacklist != null)
+			blacklist = result.blacklist;
 	});
 
 	function Vault()
@@ -146,6 +147,16 @@ console.error(e);
 			else if (request.action === "passphrase.info")
 			{
 				sendResponse({"set": passphrase!=null});
+			}
+			else if (request.action === "blacklist.get")
+			{
+				sendResponse(blacklist);
+			}
+			else if (request.action === "blacklist.set")
+			{
+				blacklist = request.blacklist;
+				chrome.storage.local.set({"blacklist": blacklist}, () => { sendResponse({"success":true}); });
+				return true;
 			}
 			else
 			{
