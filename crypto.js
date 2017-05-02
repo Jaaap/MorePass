@@ -1,12 +1,13 @@
 //{
 	'use strict';
+	let cryptoVersion = 'dog.pass.crypto.v1';
 
 	function createIv()
 	{
 		return crypto.getRandomValues(new Uint8Array(16));
 	}
 
-	function encrypt(keyStr, data) //returns iv + "\n\n" + encryptedVault
+	function encrypt(keyStr, data) //returns cryptoVersion + "\n" + iv + "\n" + encryptedVault
 	{
 		return importKey(keyStr, "encrypt").then(key => {
 			let iv = createIv();
@@ -14,33 +15,38 @@
 			let buf = encoder.encode(data);
 
 			return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, key, buf).then(encrypted => {
-				return Uint8ArrayToBase64(iv) + "\n\n" + Uint8ArrayToBase64(new Uint8Array(encrypted));
+				return cryptoVersion + "\n" + Uint8ArrayToBase64(iv) + "\n" + Uint8ArrayToBase64(new Uint8Array(encrypted));
 			});
 		});
 	}
 
 	function decrypt(keyStr, ivAndData)
 	{
-		//data is base64 iv + "\n\n" + base64 encrypted vault
-		let [b64Iv, b64Data] = ivAndData.split("\n\n");
-		if (b64Iv.length === 24)
+		//data is cryptoVersion + "\n" + base64 iv + "\n" + base64 encrypted vault
+		let [version,b64Iv, b64Data] = ivAndData.split("\n");
+		if (version == cryptoVersion)
 		{
-			let iv = Base64ToUint8Array(b64Iv);
-			if (iv.length === 16)
+			if (b64Iv.length === 24)
 			{
-				let data = Base64ToUint8Array(b64Data);
-				return importKey(keyStr, "decrypt").then(key => {
-					return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
-						let decoder = new TextDecoder("utf-8");
-						return decoder.decode(new Uint8Array(decrypted));
+				let iv = Base64ToUint8Array(b64Iv);
+				if (iv.length === 16)
+				{
+					let data = Base64ToUint8Array(b64Data);
+					return importKey(keyStr, "decrypt").then(key => {
+						return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
+							let decoder = new TextDecoder("utf-8");
+							return decoder.decode(new Uint8Array(decrypted));
+						});
 					});
-				});
+				}
+				else
+					throw({"name":"UnpackError","message":"Decoded IV length should be 16 but is " + iv.length});
 			}
 			else
-				throw({"name":"UnpackError","message":"Decoded IV length should be 16 but is " + iv.length});
+				throw({"name":"UnpackError","message":"IV length should be 24 but is " + b64Iv.length});
 		}
 		else
-			throw({"name":"UnpackError","message":"IV length should be 24 but is " + b64Iv.length});
+			throw({"name":"VersionError","message":"Version string should be " + cryptoVersion + " but is " + version});
 	}
 
 	function importKey(keyStr, mode)
