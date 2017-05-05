@@ -60,17 +60,13 @@ console.log("vaultMatches", vaultMatches);
 	$('div.left').addEventListener("click", showRightPane, false);
 	$('div.rght b.add').addEventListener("click", onPlusIconClick, false);
 	$('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
-	$('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
+	//$('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
+	$('form#siteset').addEventListener("submit", onSitesetSaveClick, false);
 	$('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
 	$('div.import button').addEventListener("click", onImportButtonClick, false);
 	$('div.export button').addEventListener("click", onExportButtonClick, false);
 }
 
-function onSettingsformChange(evt)
-{
-	evt.preventDefault();
-	chrome.runtime.sendMessage({'action': 'blacklist.set', 'blacklist': $('textarea[name="blacklist"]').value.split(/\r?\n/)});
-}
 function onPassphraseformChange(evt)
 {
 	evt.preventDefault();
@@ -251,14 +247,34 @@ function onSitesetDeleteClick(evt)
 function onImportButtonClick(evt)
 {
 	let importtype = $('input[name="importtype"]:checked').value;
+	let ta = $('div.import textarea');
+	let pp = $('input[name="passphrase"]');
+	ta.classList.remove("error");
+	pp.classList.remove("error");
 	if (importtype == "pd")
 	{
-		let passp = $('input[name="passphrase"]').value;
-		chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": passp.value, "vault": $('div.import textarea').value}, function(result) {
-			passp.value = "";
-			$('div.import textarea').value = result.success ? "*Import successful*" : "*** ERROR ***\n" + result.error;
-			chrome.runtime.sendMessage({'action': 'vault.get'}, vault => { showLeftPane(vault); });
-		});
+		if (pp.value)
+		{
+			chrome.runtime.sendMessage({'action': 'vault.decrypt.merge', "passphrase": pp.value, "vault": ta.value}, function(result) {
+				if (result.success)
+				{
+					$('div.import').classList.add("success");
+					chrome.runtime.sendMessage({'action': 'vault.get'}, vault => { showLeftPane(vault); });
+				}
+				else
+				{
+					pp.classList.add("error");
+					ta.classList.add("error");
+				}
+				$('div.import span.errormsg').textContent = result.success ? "" : result.error.message;
+			});
+		}
+		else
+		{
+			pp.classList.add("error");
+			ta.classList.add("error");
+			$('div.import span.errormsg').textContent = "Please enter your passphrase";
+		}
 	}
 	else if (importtype == "lp")
 	{
@@ -268,10 +284,23 @@ function onImportButtonClick(evt)
 
 function onExportButtonClick(evt)
 {
-	let passp = $('input[name="passphrase"]').value;
-	chrome.runtime.sendMessage({'action': 'vault.encrypt', "passphrase": passp}, function(encryptedVault) {
-		$('div.export textarea').value = encryptedVault;
-	});
+	let ta = $('div.export textarea');
+	let pp = $('input[name="passphrase"]');
+	ta.classList.remove("error");
+	pp.classList.remove("error");
+	if (pp.value)
+	{
+		chrome.runtime.sendMessage({'action': 'vault.encrypt', "passphrase": pp.value}, function(encryptedVault) {
+			ta.value = encryptedVault;
+			$('div.export').classList.add("success");
+		});
+	}
+	else
+	{
+		pp.classList.add("error");
+		ta.classList.add("error");
+	}
+	$('div.export span.errormsg').textContent = pp.value ? "" : "Please enter your passphrase";
 }
 
 function importLastpassCSV()
@@ -346,6 +375,23 @@ function importLastpassCSV()
 */
 }
 
+function onSettingsformChange(evt)
+{
+	evt.preventDefault();
+	let ta = $('div.settings textarea');
+	ta.classList.remove("error");
+	chrome.runtime.sendMessage({'action': 'blacklist.set', 'blacklist': $('textarea[name="blacklist"]').value.split(/\r?\n/)}, function(result) {
+		if (result.success)
+		{
+			$('div.settings').classList.add("success");
+		}
+		else
+		{
+			ta.classList.add("error");
+		}
+		$('div.settings span.errormsg').textContent = result.success ? "" : result.error.message;
+	});
+}
 
 document.addEventListener("DOMContentLoaded", init);
 

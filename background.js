@@ -126,15 +126,19 @@
 							vaultObj.imprt(merged);
 							sendResponse({"success":true});
 						} catch(e) {
-	console.error(e);
-							sendResponse({"success":false,"error":e.getMessage()});
+console.error(e);
+							sendResponse({"success":false,"error":e});
 						}
 					}).catch(err => {
-						sendResponse({"success":false,"error":"Decryption error"});
+console.error(err);
+						if (err.name == "OperationError")
+							sendResponse({"success":false,"error":{"name":"PassphraseError","message":"Incorrect passphrase"}});
+						else
+							sendResponse({"success":false,"error":{"name":err.name,"message":err.message}});
 					});
 				} catch(e) {
 console.error(e);
-					sendResponse({"success":false,"error":e.message});
+					sendResponse({"success":false,"error":e});
 				}
 				return true;
 			}
@@ -155,7 +159,13 @@ console.error(e);
 			else if (request.action === "blacklist.set")
 			{
 				blacklist = request.blacklist;
-				chrome.storage.local.set({"blacklist": blacklist}, () => { sendResponse({"success":true}); });
+				//chrome.storage.local.set({"blacklist": blacklist}).then(() => { sendResponse({"success":true}); }).catch(err => { sendResponse({"success":false,{"name":err.name,"message":err.message}}); });
+				chrome.storage.local.set({"blacklist": blacklist}, () => {
+					if (chrome.extension.lastError)
+						sendResponse({"success":false,"error":{"name":chrome.extension.lastError.name,"message":chrome.extension.lastError.message}});
+					else
+						sendResponse({"success":true});
+				});
 				return true;
 			}
 			else

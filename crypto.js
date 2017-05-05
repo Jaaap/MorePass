@@ -24,29 +24,44 @@
 	{
 		//data is cryptoVersion + "\n" + base64 iv + "\n" + base64 encrypted vault
 		let [version,b64Iv, b64Data] = ivAndData.split("\n");
-		if (version == cryptoVersion)
+		if (keyStr)
 		{
-			if (b64Iv.length === 24)
+			if (version == cryptoVersion)
 			{
-				let iv = Base64ToUint8Array(b64Iv);
-				if (iv.length === 16)
+				if (b64Iv)
 				{
-					let data = Base64ToUint8Array(b64Data);
-					return importKey(keyStr, "decrypt").then(key => {
-						return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
-							let decoder = new TextDecoder("utf-8");
-							return decoder.decode(new Uint8Array(decrypted));
-						});
-					});
+					if (b64Iv.length === 24)
+					{
+						let iv = Base64ToUint8Array(b64Iv);
+						if (iv.length === 16)
+						{
+							if (b64Data)
+							{
+								let data = Base64ToUint8Array(b64Data);
+								return importKey(keyStr, "decrypt").then(key => {
+									return crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, data).then(decrypted => {
+										let decoder = new TextDecoder("utf-8");
+										return decoder.decode(new Uint8Array(decrypted));
+									});
+								});
+							}
+							else
+								throw({"name":"MissingdataError","message":"Data not found. The encrypted vault must contain data on the third line"});
+						}
+						else
+							throw({"name":"IvlengthError","message":"Decoded IV length should be 16 but is " + iv.length});
+					}
+					else
+						throw({"name":"IvlengthError","message":"IV length should be 24 but is " + b64Iv.length});
 				}
 				else
-					throw({"name":"UnpackError","message":"Decoded IV length should be 16 but is " + iv.length});
+					throw({"name":"MissingivError","message":"IV not found. The encrypted vault must contain an IV on the second line"});
 			}
 			else
-				throw({"name":"UnpackError","message":"IV length should be 24 but is " + b64Iv.length});
+				throw({"name":"CryptoversionError","message":"Version string should be " + cryptoVersion});
 		}
 		else
-			throw({"name":"VersionError","message":"Version string should be " + cryptoVersion + " but is " + version});
+			throw({"name":"MissingpassphraseError","message":"Passphrase cannot be empty"});
 	}
 
 	function importKey(keyStr, mode)

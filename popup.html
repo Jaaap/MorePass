@@ -19,6 +19,11 @@ input[type="text"],input[type="password"] { width: 414px; height: 20px; border: 
 input[type="radio"],input[type="checkbox"] { display: inline-block; }
 input[type="radio"] { -moz-appearance: radio; }
 input[type="checkbox"] { -moz-appearance: checkbox; }
+textarea { width: calc(100% - 8px); height: 457px; }
+input.error,textarea.error { color: red; font-weight: bold; border: 1px solid red; }
+input.error~button:after,textarea.error~button:after { content: " ❌"; }
+div.success button:after { content: " ✅"; }
+
 ul.menu { margin: 0; padding: 0; }
 ul.menu>li { height: 26px; margin: 0; padding: 0 12px; list-style: none; display: inline-block; cursor: pointer; font-size: 20px; font-weight: bold; }
 ul.menu>li.on,ul.menu>li:hover,div.left>span.on,b.add:hover { background-color: #FFF; color: #420; }
@@ -53,7 +58,8 @@ b.add,b.reveal { cursor: pointer; display: inline-block; width: 14px; height: 14
 input[name="host"],input[name="path"] { width: calc(50% - 36px); }
 button { margin: 2px 4px 0 0; }
 
-textarea { width: calc(100% - 8px); height: 457px; }
+
+span.errormsg { display: inline-block; margin: 2px 0 0 8px; }
 </style>
 </head>
 <body>
@@ -61,7 +67,7 @@ textarea { width: calc(100% - 8px); height: 457px; }
 	<ul class="menu"><li class="on" data-href="left,rght">Sites &amp; Passwords</li><li data-href="import">Import</li><li data-href="export">Export</li><li data-href="settings">⚙</li></ul>
 	<div class="main">
 		<div class="left on"></div><div class="rght on">
-			<form>
+			<form id="siteset">
 				<div class="more">
 					<div class="url on">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
 					<div class="url">http<s>s</s>://<input type="text" name="host"/>/<input type="text" name="path"/></div>
@@ -95,10 +101,10 @@ textarea { width: calc(100% - 8px); height: 457px; }
 				<label><input type="radio" name="importtype" value="lp"/>LastPass CSV</label>
 			</div>
 			<textarea name="import"></textarea>
-			<button>Import</button>
+			<button>Import</button><span class="errormsg"></span>
 		</div><div class="export">
 			<textarea name="export"></textarea>
-			<button>Export</button>
+			<button>Export</button><span class="errormsg"></span>
 		</div><div class="settings">
 			<h4>Blacklist</h4>
 			<form id="settings">
@@ -125,7 +131,7 @@ suntrust
 usbank
 wellsfargo
 </textarea>
-				<button>Save blacklist</button>
+				<button>Save blacklist</button><span class="errormsg"></span>
 			</form>
 		</div>
 	</div>
