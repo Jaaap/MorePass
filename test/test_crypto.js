@@ -26,18 +26,26 @@ describe("crypto", function() {
 				expect(err.name).to.equal('OperationError');
 			});
 		});
-		it("encrypt, shorten iv then decrypt", function() {
+		it("encrypt, change version string then decrypt", function() {
 			let text = "daerhrthrthh";
 			let pass = "sdfgdsg";
 			return encrypt(pass,text).then(function(encrypted){ return decrypt(pass,encrypted.substr(1)); }).then(function(decrypted){ expect().fail('exception did not appear to be thrown'); }).catch(function(err){
+				expect(err.message).to.equal('Version string should be dog.pass.crypto.v1');
+				expect(err.name).to.equal('CryptoversionError');
+			});
+		});
+		it("encrypt, shorten iv then decrypt", function() {
+			let text = "daerhrthrthh";
+			let pass = "sdfgdsg";
+			return encrypt(pass,text).then(function(encrypted){ let splt = encrypted.split("\n"); splt[1] = splt[1].substr(1); return decrypt(pass,splt.join("\n")); }).then(function(decrypted){ expect().fail('exception did not appear to be thrown'); }).catch(function(err){
 				expect(err.message).to.equal('IV length should be 24 but is 23');
-				expect(err.name).to.equal('UnpackError');
+				expect(err.name).to.equal('IvlengthError');
 			});
 		});
 		it("encrypt, modify iv then decrypt", function() {
 			let text = "daerhrthrthh";
 			let pass = "sdfgdsg";
-			return encrypt(pass,text).then(function(encrypted){ return decrypt(pass,"0123456789"+encrypted.substr(10)); }).then(function(decrypted){ expect().fail('exception did not appear to be thrown'); }).catch(function(err){
+			return encrypt(pass,text).then(function(encrypted){ let splt = encrypted.split("\n"); splt[1] = "0123456789"+splt[1].substr(10); return decrypt(pass,splt.join("\n")); }).then(function(decrypted){ expect().fail('exception did not appear to be thrown'); }).catch(function(err){
 				expect(err.message).to.equal('The operation failed for an operation-specific reason');
 				expect(err.name).to.equal('OperationError');
 			});

@@ -10,11 +10,11 @@ function init()
 				let currentTab = tabs[0];
 				let tabLocation = new URL(currentTab.url);
 				let vaultMatches = getVaultMatches(vault, tabLocation);
+				let baseDomain = tlds.getBaseDomain(tabLocation.hostname);
 console.log("vaultMatches", vaultMatches);
 				if (vaultMatches.length > 0)
 				{
-					let tld = tlds.getTLD(tabLocation.hostname);
-					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'tld': tld}, data => {
+					chrome.tabs.sendMessage(currentTab.id, {'type': 'hasLoginForm', 'baseDomain': baseDomain}, data => {
 						if (typeof data !== 'undefined')
 						{
 							let hasLoginForm = data[0];
@@ -34,10 +34,14 @@ console.log("vaultMatches", vaultMatches);
 								let row = vaultMatches[i];
 								if (vaultMatches.length > 1)
 									chrome.browserAction.setBadgeText({"text": (1+i) + "/" + vaultMatches.length, "tabId": currentTab.id});
-								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'tld': tld, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, response => { window.close(); });
+								chrome.tabs.sendMessage(currentTab.id, {'type': 'fillLoginForm', 'baseDomain': baseDomain, 'user': row[USERNAME], 'pass': row[PASSWORD], 'submit': vaultMatches.length == 1}, response => { window.close(); });
 							}
 						}
 					});
+				}
+				else if (baseDomain)
+				{
+					$('form#siteset input[name="host"]').value = baseDomain;
 				}
 			});
 			showLeftPane(vault);
@@ -60,7 +64,6 @@ console.log("vaultMatches", vaultMatches);
 	$('div.left').addEventListener("click", showRightPane, false);
 	$('div.rght b.add').addEventListener("click", onPlusIconClick, false);
 	$('div.rght b.reveal').addEventListener("click", onEyeIconClick, false);
-	//$('div.rght button.save').addEventListener("click", onSitesetSaveClick, false);
 	$('form#siteset').addEventListener("submit", onSitesetSaveClick, false);
 	$('div.rght button.del').addEventListener("click", onSitesetDeleteClick, false);
 	$('div.import button').addEventListener("click", onImportButtonClick, false);
@@ -220,6 +223,7 @@ function onEyeIconClick(evt)
 
 function onSitesetSaveClick(evt)
 {
+	evt.preventDefault();
 	//[[{"hostname":"abc.nl"}],"me@gmail.com","******"]
 	let entry = [[]];
 	entry[USERNAME] = $('div.rght input[name="username"]').value;

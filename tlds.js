@@ -8041,20 +8041,23 @@ let tlds = [
 "za.net",
 "za.org"
 ];
+
+function isvalidHostname(hostname)
+{
+	return hostname != null && typeof hostname == "string" && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname);
+}
 let getBaseDomainByTld = function(hostname, tld)
 {
-	if (tld == "")
-		return hostname;
-	let pos = hostname.lastIndexOf(".", hostname.length - tld.length - 2);
-	//console.log(hostname,tld, pos, hostname.length - tld.length);
-	return hostname.substr(pos+1);
+	if (isvalidHostname(hostname))
+	{
+		let pos = hostname.lastIndexOf(".", hostname.length - tld.length - 2);
+		return hostname.substr(pos+1);
+	}
 }
 function getTLD(hostname)
 {
-	if (hostname != null)
+	if (isvalidHostname(hostname))
 	{
-		if (hostname.indexOf(".") == -1 || /^[\d.]*$/.test(hostname))
-			return hostname;
 		let longestMatchingTld = "";
 		for (let tld of tlds)
 		{
@@ -8067,17 +8070,17 @@ function getTLD(hostname)
 }
 function getBaseDomain(hostname)
 {
-	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
+	if (isvalidHostname(hostname))
 		return getBaseDomainByTld(hostname, getTLD(hostname));
 }
 function getBaseDomainWithoutTLD(hostname)
 {
-	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
+	if (isvalidHostname(hostname))
 		return getBaseDomainByTld(hostname, getTLD(hostname)).split(".")[0];
 }
 function splitHostname(hostname)
 {
-	if (hostname != null && hostname.indexOf(".") > -1 && !/^[\d.]*$/.test(hostname))
+	if (isvalidHostname(hostname))
 	{
 		let tld = getTLD(hostname);
 		if (tld.length)
@@ -8090,6 +8093,6 @@ function splitHostname(hostname)
 	}
 }
 
-window.tlds = {"getTLD": getTLD, "getBaseDomain": getBaseDomain, "getBaseDomainWithoutTLD": getBaseDomainWithoutTLD, "splitHostname": splitHostname};
+window.tlds = {"getBaseDomain": getBaseDomain, "getBaseDomainWithoutTLD": getBaseDomainWithoutTLD, "splitHostname": splitHostname};
 
 }

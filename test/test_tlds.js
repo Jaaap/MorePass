@@ -1,6 +1,7 @@
 var expect = chai.expect;
 //"hostname","port","pathname","search"]
 describe("tlds", function() {
+/*
 	describe("getTLD", function() {
 		it("amazon", function() {
 			let base = "amazon";
@@ -12,6 +13,7 @@ describe("tlds", function() {
 			expect(tlds.getTLD("subsub.sub." + base + ".co.uk")).to.equal("co.uk");
 		});
 	});
+*/
 	describe("getBaseDomain", function() {
 		it("amazon", function() {
 			let base = "amazon";

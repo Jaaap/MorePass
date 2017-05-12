@@ -17,21 +17,21 @@ function triggerEvent(elem, eventType)
 	return elem.dispatchEvent(new Event(eventType, {'bubbles': true, 'cancelable': true}));
 }
 
-function getPasswordInput(docRoot, tld)
+function getPasswordInput(docRoot, baseDomain)
 {
 	let inputs = docRoot.querySelectorAll('form[method="post" i] input[type="password"],form input[type="password"]');
-	//level 1: form's action must match tld
+	//level 1: form's action must match baseDomain
 	for (let i = 0; i < inputs.length; i++)
 	{
 		let action = inputs[i].form.action;
 		if (action && action.length)
 		{
 			let url = new URL(action);
-			if (url && url.hostname && (!tld || url.hostname == tld || url.hostname.endsWith("." + tld)))
+			if (url && url.hostname && (!baseDomain || url.hostname == baseDomain || url.hostname.endsWith("." + baseDomain)))
 				return inputs[i];
 		}
 	}
-	//level 2: forget the tld and the action and just return the first input from inputs
+	//level 2: forget the baseDomain and the action and just return the first input from inputs
 	if (inputs.length)
 		return inputs[0];
 }
@@ -72,7 +72,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 {
 	if (message.type === 'hasLoginForm')
 	{
-		let passwordInput = getPasswordInput(document, message.tld);
+		let passwordInput = getPasswordInput(document, message.baseDomain);
 		if (passwordInput != null)
 		{
 			isUnknownCredentials = false;
@@ -85,7 +85,7 @@ chrome.runtime.onMessage.addListener(function (message, sender, sendResponse)
 	}
 	else if (message.type === 'fillLoginForm')
 	{
-		let passwordInput = getPasswordInput(document, message.tld);
+		let passwordInput = getPasswordInput(document, message.baseDomain);
 		if (passwordInput)
 		{
 			isUnknownCredentials = false;
