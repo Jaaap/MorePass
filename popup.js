@@ -5,8 +5,10 @@ function init()
 {
 	if ("chrome" in window)
 	{
-		chrome.runtime.sendMessage({'action': 'vault.get'}, vault => {
-			chrome.tabs.query({'active': true, 'currentWindow': true}, tabs => {
+		let vaultGetProm = new Promise((resolve, reject) => { chrome.runtime.sendMessage({'action': 'vault.get'}, response => resolve(response)) });
+		let tabsQueryProm = new Promise((resolve, reject) => { chrome.tabs.query({'active': true, 'currentWindow': true}, response => resolve(response)) });
+		vaultGetProm.then(vault => {
+			tabsQueryProm.then(tabs => {
 				let currentTab = tabs[0];
 				let tabLocation = new URL(currentTab.url);
 				let vaultMatches = getVaultMatches(vault, tabLocation);
