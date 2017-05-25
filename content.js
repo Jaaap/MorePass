@@ -136,7 +136,11 @@ let passwordInput = getPasswordInput(document);
 if (passwordInput)
 {
 	chrome.runtime.sendMessage({'action': "blacklist.get"}, blacklist => {
-		if (blacklist != null)
+		if (blacklist == null)
+		{
+			console.warn("pass.dog content.js: No blacklist found");
+		}
+		else
 		{
 			let action = passwordInput.form.action;
 			if (action && action.length)

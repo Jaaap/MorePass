@@ -23,6 +23,7 @@ describe("tlds", function() {
 			expect(tlds.getBaseDomain("sub." + base + ".co.uk")).to.equal(base + ".co.uk");
 			expect(tlds.getBaseDomain("subsub.sub." + base + ".com")).to.equal(base + ".com");
 			expect(tlds.getBaseDomain("subsub.sub." + base + ".co.uk")).to.equal(base + ".co.uk");
+			expect(tlds.getBaseDomain(base + ".community")).to.equal(base + ".community");
 		});
 	});
 	describe("getBaseDomainWithoutTLD", function() {
@@ -34,6 +35,7 @@ describe("tlds", function() {
 			expect(tlds.getBaseDomainWithoutTLD("sub." + base + ".co.uk")).to.equal(base);
 			expect(tlds.getBaseDomainWithoutTLD("subsub.sub." + base + ".com")).to.equal(base);
 			expect(tlds.getBaseDomainWithoutTLD("subsub.sub." + base + ".co.uk")).to.equal(base);
+			expect(tlds.getBaseDomainWithoutTLD(base + ".community")).to.equal(base);
 		});
 	});
 });
