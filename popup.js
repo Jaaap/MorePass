@@ -161,6 +161,11 @@ function showLeftPane(vault)
 	let last;
 	while (last = divLeft.lastChild) divLeft.removeChild(last);
 	divLeft.appendChild(frag);
+
+	//clear right pane
+	$('input[name="username"]').value = "";
+	$('input[name="password"]').value = "";
+	Array.from(document.querySelectorAll('div>div.url input')).forEach(input => { input.value = ""; });
 }
 
 function showRightPane(evt)
