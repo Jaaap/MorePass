@@ -78,6 +78,10 @@
 				let siteset = [[{"hostname": baseDomain}], request.username, request.password, UNSAVED];
 				vaultObj.add(siteset);
 			}
+			else if (request.action === "blacklist.get")
+			{
+				sendResponse(blacklist);
+			}
 		}
 		else //from popup
 		{
