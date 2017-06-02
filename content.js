@@ -149,8 +149,9 @@ if (passwordInput)
 				if (blacklist.indexOf(tlds.getBaseDomainWithoutTLD(actionUrl)) > -1)
 					return;
 			}
-			if (blacklist.indexOf(tlds.getBaseDomainWithoutTLD(document.location.hostname)) == -1)
+			if (blacklist.indexOf(tlds.getBaseDomainWithoutTLD(document.location.hostname)) > -1)
 				return;
+
 			//catch new credentials
 			passwordInput.form.addEventListener("submit", onLoginformSubmit, false);
 		}

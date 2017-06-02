@@ -125,7 +125,7 @@ function makeLeftpaneSpans(vault, savedState)
 					if (splitHostname.length)
 					{
 						let i = document.createElement("i");
-						let subDomain = "." + splitHostname.join(".");
+						let subDomain = "." + splitHostname.reverse().join(".");
 						baseDomain += subDomain;
 						i.appendChild(document.createTextNode(subDomain));
 						span.appendChild(i);
