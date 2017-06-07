@@ -17,6 +17,7 @@ describe("tlds", function() {
 	describe("getBaseDomain", function() {
 		it("amazon", function() {
 			let base = "amazon";
+			expect(tlds.getBaseDomain("stepstone01")).to.equal(undefined);
 			expect(tlds.getBaseDomain(base + ".com")).to.equal(base + ".com");
 			expect(tlds.getBaseDomain(base + ".co.uk")).to.equal(base + ".co.uk");
 			expect(tlds.getBaseDomain("sub." + base + ".com")).to.equal(base + ".com");

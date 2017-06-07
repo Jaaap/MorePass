@@ -75,7 +75,7 @@
 				chrome.browserAction.setBadgeText({text: "*"});
 				let url = getUrlFromHref(request.docuhref);
 				let baseDomain = tlds.getBaseDomain(url.hostname);
-				let siteset = [[{"hostname": baseDomain}], request.username, request.password, UNSAVED];
+				let siteset = [[{"hostname": baseDomain||url.hostname}], request.username, request.password, UNSAVED];
 				vaultObj.add(siteset);
 			}
 			else if (request.action === "blacklist.get")
