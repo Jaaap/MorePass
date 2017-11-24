@@ -153,8 +153,12 @@ function showLeftPane(vault)
 {
 	let frag = document.createDocumentFragment();
 	frag.appendChild(makeSpan(null, null, "New", "h3"));
-	frag.appendChild(makeSpan(null, null, "*Add new*", "on"));
-	makeLeftpaneSpans(vault, UNSAVED).forEach(span => { frag.appendChild(span[1]); });
+	let activeSpan = makeSpan(null, null, "*Add new*", "on")
+	frag.appendChild(activeSpan);
+	let unsavedSpans = makeLeftpaneSpans(vault, UNSAVED);
+	unsavedSpans.forEach(span => { frag.appendChild(span[1]); });
+	if (unsavedSpans.length)
+		activeSpan = unsavedSpans[0][1];
 	frag.appendChild(makeSpan(null, null, "Saved", "h3"));
 	makeLeftpaneSpans(vault, SAVED).forEach(span => { frag.appendChild(span[1]); });
 	let divLeft = $('div.left');
@@ -163,9 +167,12 @@ function showLeftPane(vault)
 	divLeft.appendChild(frag);
 
 	//clear right pane
+	showRightPane({target:activeSpan});
+/*
 	$('input[name="username"]').value = "";
 	$('input[name="password"]').value = "";
 	Array.from(document.querySelectorAll('div>div.url input')).forEach(input => { input.value = ""; });
+*/
 }
 
 function showRightPane(evt)
