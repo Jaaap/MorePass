@@ -51,7 +51,7 @@ function getUsernameInput(passwordInput)
 }
 function getSubmitButton(passwordInput)
 {
-	return passwordInput.form.querySelector('input[type="submit"],button[type="submit"],button:not([type]),input[type="image"]');
+	return passwordInput.form.querySelector('input[type="submit"],button[type="submit"],button:not([type]),input[type="image"],input[type="button"]');
 }
 function getRemembermeCheckbox(passwordInput)
 {
